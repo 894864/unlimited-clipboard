@@ -22,10 +22,10 @@
     .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border:1px solid #b6cdf633; border-radius:999px; background:#fff9; color:#4c6b9e; font-size:12px; font-weight:750; letter-spacing:.08em; }.eyebrow i { width:7px; height:7px; border-radius:50%; background:#2ab878; box-shadow:0 0 0 4px #2ab87820; }
     h1 { margin:18px 0 14px; font-size:clamp(42px,5vw,66px); line-height:1.08; letter-spacing:-.065em; }.accent { color:var(--blue); }
     .lead { max-width:680px; margin:0; color:var(--muted); font-size:17px; line-height:1.75; }.lead strong { color:#2a3e61; }
-    .features { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; max-width:720px; margin:22px 0 24px; }.feature { min-height:82px; padding:13px 14px; border:1px solid var(--line); border-radius:14px; background:#ffffffb8; box-shadow:0 12px 28px #25466d0a; }.feature b { display:block; margin:0 0 4px; font-size:14px; }.feature p { margin:0; color:#718099; font-size:12px; line-height:1.62; }.feature b::before { display:inline-grid; place-items:center; width:20px; height:20px; margin-right:6px; border-radius:6px; background:#e9f1ff; color:#3976dd; font-size:12px; }.feature:nth-child(1) b::before { content:"∞"; }.feature:nth-child(2) b::before { content:"⌕"; }.feature:nth-child(3) b::before { content:"★"; }.feature:nth-child(4) b::before { content:"↗"; }
+    .features { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; max-width:720px; margin:22px 0 24px; }.feature { min-height:82px; padding:13px 14px; border:1px solid var(--line); border-radius:14px; background:#ffffffb8; box-shadow:0 12px 28px #25466d0a; }.feature b { display:block; margin:0 0 9px; font-size:14px; }.feature p { margin:0; color:#718099; font-size:12px; line-height:1.62; }.feature b::before { display:inline-grid; place-items:center; width:20px; height:20px; margin-right:6px; border-radius:6px; background:#e9f1ff; color:#3976dd; font-size:12px; }.feature:nth-child(1) b::before { content:"∞"; }.feature:nth-child(2) b::before { content:"⌕"; }.feature:nth-child(3) b::before { content:"★"; }.feature:nth-child(4) b::before { content:"↗"; }
     .actions { display:flex; align-items:center; flex-wrap:wrap; gap:14px; }.download { display:inline-flex; align-items:center; gap:9px; padding:14px 19px; border-radius:12px; background:linear-gradient(135deg,#4d91ff,#2f6fe0); box-shadow:0 14px 28px #3975d84a; color:#fff; font-weight:750; text-decoration:none; transition:.2s ease; }.download:hover { transform:translateY(-2px); box-shadow:0 19px 34px #3975d866; }.download b { font-size:20px; line-height:1; }.hint { color:#8190a5; font-size:12px; }
-    .qr-side { justify-self:end; }.qr-side img { display:block; width:218px; height:auto; border:1px solid #dce7f8; border-radius:18px; background:#fff; box-shadow:0 24px 54px #2648751c; }
-    @media (max-width:820px) { .page { width:min(100% - 32px,620px); }.version { display:none; } main { grid-template-columns:1fr; gap:28px; padding:36px 0; }.qr-side { justify-self:start; }.qr-side img { width:190px; }.features { max-width:none; } }
+    .qr-side { justify-self:end; text-align:center; }.qr-side img { display:block; width:262px; height:auto; border:1px solid #dce7f8; border-radius:18px; background:#fff; box-shadow:0 24px 54px #2648751c; }.qr-note { margin:12px 0 0; color:#526889; font-size:13px; font-weight:700; }
+    @media (max-width:820px) { .page { width:min(100% - 32px,620px); }.version { display:none; } main { grid-template-columns:1fr; gap:28px; padding:36px 0; }.qr-side { justify-self:start; }.qr-side img { width:228px; }.features { max-width:none; } }
     @media (max-width:560px) { .page { width:min(100% - 28px,620px); } nav { height:64px; } h1 { font-size:43px; }.lead { font-size:16px; }.features { grid-template-columns:1fr; }.feature { min-height:0; } }
   </style>
 </head>
@@ -51,7 +51,7 @@
         </div>
         <div class="actions"><a class="download" href="download/InfiniteClipboard-Setup-1.0.1.exe" download><b>↓</b>下载 Windows 版</a><span class="hint">v1.0.1 · 无需管理员权限，历史记录仅保存在本地</span></div>
       </section>
-      <aside class="qr-side"><img src="assets/xiaohongshu-qr.jpg" alt="灵魂 vibe coder 的小红书二维码"></aside>
+      <aside class="qr-side"><img src="assets/xiaohongshu-qr.jpg" alt="灵魂 vibe coder 的小红书二维码"><p class="qr-note">关注作者 / 反馈问题</p></aside>
     </main>
   </div>
 </body>
