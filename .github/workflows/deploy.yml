@@ -1,0 +1,33 @@
+name: Deploy Unlimited Clipboard website
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: unlimited-clipboard-production
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: [self-hosted, bili-deploy]
+    environment: production
+    env:
+      DEPLOY_DIR: ${{ vars.UNLIMITED_CLIPBOARD_DEPLOY_DIR }}
+    steps:
+      - name: Update production checkout and reload PM2
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${DEPLOY_DIR:?Set the repository variable UNLIMITED_CLIPBOARD_DEPLOY_DIR to the server checkout path.}"
+          cd "$DEPLOY_DIR"
+          git fetch --prune origin main
+          git checkout --quiet main
+          git pull --ff-only origin main
+          npm ci --omit=dev --prefix website
+          pm2 reload ecosystem.config.cjs --only unlimited-clipboard --update-env || pm2 start ecosystem.config.cjs --only unlimited-clipboard --update-env
+          curl --fail --silent --show-error http://127.0.0.1:3000/healthz

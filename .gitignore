@@ -1,0 +1,21 @@
+# Local settings and secrets
+.env
+.env.*
+!.env.example
+
+# Runtime output
+logs/
+*.log
+*.pid
+website/node_modules/
+
+# Local desktop build output
+build/
+dist/
+website/download/*.exe
+
+# User data and temporary files
+*.db
+*.sqlite
+*.sqlite3
+*.tmp
