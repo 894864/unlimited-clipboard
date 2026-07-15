@@ -14,20 +14,35 @@ concurrency:
 
 jobs:
   deploy:
-    runs-on: [self-hosted, bili-deploy]
+    if: ${{ vars.DEPLOYMENT_READY == 'true' }}
+    runs-on: ubuntu-latest
     environment: production
     env:
-      DEPLOY_DIR: ${{ vars.UNLIMITED_CLIPBOARD_DEPLOY_DIR }}
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+      DEPLOY_PORT: ${{ secrets.DEPLOY_PORT }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
     steps:
+      - name: Configure deployment SSH key
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$DEPLOY_SSH_KEY" > "$HOME/.ssh/id_ed25519"
+          chmod 600 "$HOME/.ssh/id_ed25519"
+          printf '%s\n' "$DEPLOY_KNOWN_HOSTS" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
       - name: Update production checkout and reload PM2
         shell: bash
         run: |
           set -euo pipefail
-          : "${DEPLOY_DIR:?Set the repository variable UNLIMITED_CLIPBOARD_DEPLOY_DIR to the server checkout path.}"
-          cd "$DEPLOY_DIR"
-          git fetch --prune origin main
-          git checkout --quiet main
+          ssh -p "${DEPLOY_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" 'bash -se' <<'REMOTE'
+          set -euo pipefail
+          cd /opt/unlimited-clipboard
           git pull --ff-only origin main
           npm ci --omit=dev --prefix website
-          pm2 reload ecosystem.config.cjs --only unlimited-clipboard --update-env || pm2 start ecosystem.config.cjs --only unlimited-clipboard --update-env
-          curl --fail --silent --show-error http://127.0.0.1:3000/healthz
+          pm2 reload ecosystem.config.cjs --only unlimited-clipboard --update-env
+          curl --fail --silent --show-error http://127.0.0.1:3001/healthz
+          REMOTE
