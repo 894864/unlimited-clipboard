@@ -1,6 +1,6 @@
 ﻿{
-    "version":  "1.0.0",
-    "downloadUrl":  "download/InfiniteClipboard-Setup-1.0.0.exe",
-    "sha256":  "EB897FBDC65DB70404D7D1BB95A217D456B5B5209BE412A365EB2F59E37DFD19",
+    "version":  "1.0.1",
+    "downloadUrl":  "download/InfiniteClipboard-Setup-1.0.1.exe",
+    "sha256":  "9296A0FCC55A40CAFCDDE66E3F68D0EC2B72035D971BCEF582A14C5E0460836A",
     "notes":  "Stability improvements and usability updates."
 }

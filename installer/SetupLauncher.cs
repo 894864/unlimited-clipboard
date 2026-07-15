@@ -7,8 +7,8 @@ using Microsoft.Win32;
 
 [assembly: AssemblyTitle("Unlimited Clipboard Setup")]
 [assembly: AssemblyProduct("Unlimited Clipboard")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 
 namespace InfiniteClipboardSetup
 {
@@ -69,7 +69,7 @@ namespace InfiniteClipboardSetup
             using (RegistryKey uninstall = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\InfiniteClipboard"))
             {
                 uninstall.SetValue("DisplayName", AppName);
-                uninstall.SetValue("DisplayVersion", "1.0.0");
+                uninstall.SetValue("DisplayVersion", "1.0.1");
                 uninstall.SetValue("Publisher", "Unlimited Clipboard");
                 uninstall.SetValue("InstallLocation", installDir);
                 uninstall.SetValue("UninstallString", "\"" + appPath + "\" --uninstall");

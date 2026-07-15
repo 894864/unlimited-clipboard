@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$appVersion = '1.0.0'
+$appVersion = '1.0.1'
 $buildDir = Join-Path $root 'build\native'
 $stagingDir = Join-Path $buildDir 'package'
 $outputDir = Join-Path $root 'dist'

@@ -25,8 +25,8 @@ using System.Reflection;
 
 [assembly: AssemblyTitle("Unlimited Clipboard")]
 [assembly: AssemblyProduct("Unlimited Clipboard")]
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]
 
 namespace InfiniteClipboard
 {
@@ -82,7 +82,7 @@ namespace InfiniteClipboard
             get
             {
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                return version == null ? "1.0.0" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
+                return version == null ? "1.0.1" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
             }
         }
 
@@ -188,6 +188,7 @@ namespace InfiniteClipboard
         public const int HWND_BROADCAST = 0xffff;
         public const int MOD_ALT = 0x0001;
         public const int MOD_CONTROL = 0x0002;
+        public const int MOD_NOREPEAT = 0x4000;
         public const int VK_V = 0x56;
         public const int CF_UNICODETEXT = 13;
         public const int CF_HDROP = 15;
@@ -693,6 +694,7 @@ namespace InfiniteClipboard
         bool closeHintShown = false;
         bool suppressCapture = false;
         bool startHidden = false;
+        bool hotkeyRegistered = false;
         string appScriptPath;
         const int HOTKEY_ID = 9417;
         static readonly int SHOW_MESSAGE = Native.RegisterWindowMessage("InfiniteClipboard.ShowMainWindow.v1");
@@ -715,8 +717,12 @@ namespace InfiniteClipboard
 
             BuildUi(scriptPath);
             Native.AddClipboardFormatListener(Handle);
-            Native.RegisterHotKey(Handle, HOTKEY_ID, Native.MOD_CONTROL | Native.MOD_ALT, Native.VK_V);
+            hotkeyRegistered = Native.RegisterHotKey(Handle, HOTKEY_ID, Native.MOD_CONTROL | Native.MOD_ALT | Native.MOD_NOREPEAT, Native.VK_V);
             BuildTray();
+            if (!hotkeyRegistered)
+            {
+                Shown += delegate { BeginInvoke(new Action(delegate { if (tray != null) tray.ShowBalloonTip(5000, "快捷键未启用", "Ctrl+Alt+V 已被其他程序占用。关闭冲突程序后重启无限剪贴板即可恢复。", ToolTipIcon.Warning); })); };
+            }
             if (!store.Index.StartupConfigured)
             {
                 SetStartup(scriptPath, true);
@@ -783,7 +789,7 @@ namespace InfiniteClipboard
                 return;
             }
             Native.RemoveClipboardFormatListener(Handle);
-            Native.UnregisterHotKey(Handle, HOTKEY_ID);
+            if (hotkeyRegistered) Native.UnregisterHotKey(Handle, HOTKEY_ID);
             if (tray != null) tray.Dispose();
             base.OnFormClosing(e);
         }
