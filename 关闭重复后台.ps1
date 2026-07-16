@@ -1,6 +1,6 @@
 ﻿$ErrorActionPreference = "SilentlyContinue"
 
-$scriptPath = Join-Path $PSScriptRoot "InfiniteClipboard.ps1"
+$scriptPath = Join-Path $PSScriptRoot "unlimited-clipboard.ps1"
 $escaped = [regex]::Escape($scriptPath)
 $current = $PID
 

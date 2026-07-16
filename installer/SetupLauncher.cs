@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
@@ -8,12 +8,12 @@ using System.Threading;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
-[assembly: AssemblyTitle("Unlimited Clipboard Setup")]
-[assembly: AssemblyProduct("Unlimited Clipboard")]
-[assembly: AssemblyVersion("1.0.2.0")]
-[assembly: AssemblyFileVersion("1.0.2.0")]
+[assembly: AssemblyTitle("unlimited clipboard setup")]
+[assembly: AssemblyProduct("unlimited clipboard")]
+[assembly: AssemblyVersion("1.0.3.0")]
+[assembly: AssemblyFileVersion("1.0.3.0")]
 
-namespace InfiniteClipboardSetup
+namespace UnlimitedClipboardSetup
 {
     internal static class Program
     {
@@ -28,8 +28,8 @@ namespace InfiniteClipboardSetup
 
     internal sealed class InstallerForm : Form
     {
-        const string VersionText = "1.0.2";
-        const string UninstallKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\InfiniteClipboard";
+        const string VersionText = "1.0.3";
+        const string UninstallKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Uninstall\unlimited-clipboard";
         const string RunKeyPath = @"Software\Microsoft\Windows\CurrentVersion\Run";
         static readonly string AppName = "无限剪贴板";
 
@@ -167,34 +167,38 @@ namespace InfiniteClipboardSetup
         string Install(string installDir)
         {
             string packageDir = AppDomain.CurrentDomain.BaseDirectory;
-            string sourceApp = Path.Combine(packageDir, "InfiniteClipboard.exe");
+            string sourceApp = Path.Combine(packageDir, "unlimited-clipboard.exe");
             string sourceUpdater = Path.Combine(packageDir, "UpdateLauncher.exe");
+            string sourceIcon = Path.Combine(packageDir, "unlimited-clipboard.ico");
             if (!File.Exists(sourceApp)) throw new FileNotFoundException("安装包缺少主程序文件。", sourceApp);
             if (!File.Exists(sourceUpdater)) throw new FileNotFoundException("安装包缺少更新组件。", sourceUpdater);
+            if (!File.Exists(sourceIcon)) throw new FileNotFoundException("安装包缺少程序图标。", sourceIcon);
 
             string previousInstallDir = ExistingInstallDirectory();
-            bool isUpgrade = !string.IsNullOrWhiteSpace(previousInstallDir) || File.Exists(Path.Combine(installDir, "InfiniteClipboard.exe"));
+            bool isUpgrade = !string.IsNullOrWhiteSpace(previousInstallDir) || File.Exists(Path.Combine(installDir, "unlimited-clipboard.exe"));
             bool startupEnabled = IsStartupEnabled();
             StopRunningApplication();
 
             Directory.CreateDirectory(installDir);
-            string appPath = Path.Combine(installDir, "InfiniteClipboard.exe");
+            string appPath = Path.Combine(installDir, "unlimited-clipboard.exe");
             string updaterPath = Path.Combine(installDir, "UpdateLauncher.exe");
+            string appIconPath = Path.Combine(installDir, "unlimited-clipboard-" + VersionText + ".ico");
             CopyWithRetry(sourceApp, appPath);
             CopyWithRetry(sourceUpdater, updaterPath);
+            CopyWithRetry(sourceIcon, appIconPath);
 
             string programs = Environment.GetFolderPath(Environment.SpecialFolder.Programs);
             string menuDir = Path.Combine(programs, AppName);
             Directory.CreateDirectory(menuDir);
-            CreateShortcut(Path.Combine(menuDir, AppName + ".lnk"), appPath, "", installDir, "Clipboard history manager");
-            CreateShortcut(Path.Combine(menuDir, "卸载" + AppName + ".lnk"), appPath, "--uninstall", installDir, "Uninstall InfiniteClipboard");
-            CreateShortcut(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), AppName + ".lnk"), appPath, "", installDir, "Clipboard history manager");
+            CreateShortcut(Path.Combine(menuDir, AppName + ".lnk"), appPath, "", installDir, appIconPath, "Clipboard history manager");
+            CreateShortcut(Path.Combine(menuDir, "卸载" + AppName + ".lnk"), appPath, "--uninstall", installDir, appIconPath, "Uninstall unlimited clipboard");
+            CreateShortcut(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory), AppName + ".lnk"), appPath, "", installDir, appIconPath, "Clipboard history manager");
 
             using (RegistryKey run = Registry.CurrentUser.CreateSubKey(RunKeyPath))
             {
                 bool shouldEnableStartup = isUpgrade ? startupEnabled : true;
-                if (shouldEnableStartup) run.SetValue("InfiniteClipboard", "\"" + appPath + "\" --background");
-                else run.DeleteValue("InfiniteClipboard", false);
+                if (shouldEnableStartup) run.SetValue("unlimited-clipboard", "\"" + appPath + "\" --background");
+                else run.DeleteValue("unlimited-clipboard", false);
             }
 
             long estimatedSizeKb = Math.Max(1, (new FileInfo(appPath).Length + new FileInfo(updaterPath).Length) / 1024);
@@ -202,9 +206,9 @@ namespace InfiniteClipboardSetup
             {
                 uninstall.SetValue("DisplayName", AppName);
                 uninstall.SetValue("DisplayVersion", VersionText);
-                uninstall.SetValue("Publisher", "Unlimited Clipboard");
+                uninstall.SetValue("Publisher", "unlimited clipboard");
                 uninstall.SetValue("InstallLocation", installDir);
-                uninstall.SetValue("DisplayIcon", appPath + ",0");
+                uninstall.SetValue("DisplayIcon", appIconPath + ",0");
                 uninstall.SetValue("UninstallString", "\"" + appPath + "\" --uninstall");
                 uninstall.SetValue("EstimatedSize", (int)Math.Min(int.MaxValue, estimatedSizeKb), RegistryValueKind.DWord);
                 uninstall.SetValue("InstallDate", DateTime.Now.ToString("yyyyMMdd"));
@@ -287,7 +291,7 @@ namespace InfiniteClipboardSetup
         {
             string existing = ExistingInstallDirectory();
             if (!string.IsNullOrWhiteSpace(existing)) return existing;
-            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "InfiniteClipboard");
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Programs", "unlimited-clipboard");
         }
 
         static string ExistingInstallDirectory()
@@ -308,7 +312,7 @@ namespace InfiniteClipboardSetup
             {
                 using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RunKeyPath, false))
                 {
-                    return key != null && key.GetValue("InfiniteClipboard") != null;
+                    return key != null && key.GetValue("unlimited-clipboard") != null;
                 }
             }
             catch { return false; }
@@ -316,14 +320,14 @@ namespace InfiniteClipboardSetup
 
         static void StopRunningApplication()
         {
-            Process[] running = Process.GetProcessesByName("InfiniteClipboard");
+            Process[] running = Process.GetProcessesByName("unlimited-clipboard");
             if (running.Length == 0) return;
-            int message = RegisterWindowMessage("InfiniteClipboard.Exit.v1");
+            int message = RegisterWindowMessage("unlimited-clipboard.Exit.v1");
             PostMessage((IntPtr)0xffff, message, IntPtr.Zero, IntPtr.Zero);
             DateTime deadline = DateTime.UtcNow.AddSeconds(10);
             while (DateTime.UtcNow < deadline)
             {
-                if (Process.GetProcessesByName("InfiniteClipboard").Length == 0) return;
+                if (Process.GetProcessesByName("unlimited-clipboard").Length == 0) return;
                 Thread.Sleep(200);
             }
             throw new InvalidOperationException("程序仍在运行。请从系统托盘退出后重试。");
@@ -349,11 +353,12 @@ namespace InfiniteClipboardSetup
         {
             try
             {
-                foreach (string name in new string[] { "InfiniteClipboard.exe", "UpdateLauncher.exe", "InfiniteClipboard.ps1", "Launch.vbs", "Uninstall.ps1", "启动无限剪贴板.vbs" })
+                foreach (string name in new string[] { "unlimited-clipboard.exe", "UpdateLauncher.exe", "unlimited-clipboard.ps1", "unlimited-clipboard.vbs", "Uninstall.ps1", "启动无限剪贴板.vbs" })
                 {
                     string path = Path.Combine(directory, name);
                     if (File.Exists(path)) File.Delete(path);
                 }
+                foreach (string iconPath in Directory.GetFiles(directory, "unlimited-clipboard-*.ico")) File.Delete(iconPath);
                 if (Directory.Exists(directory) && Directory.GetFileSystemEntries(directory).Length == 0) Directory.Delete(directory, false);
             }
             catch { }
@@ -365,7 +370,7 @@ namespace InfiniteClipboardSetup
             catch { return false; }
         }
 
-        static void CreateShortcut(string shortcutPath, string targetPath, string arguments, string workingDirectory, string description)
+        static void CreateShortcut(string shortcutPath, string targetPath, string arguments, string workingDirectory, string iconPath, string description)
         {
             Type shellType = Type.GetTypeFromProgID("WScript.Shell");
             object shell = Activator.CreateInstance(shellType);
@@ -374,7 +379,7 @@ namespace InfiniteClipboardSetup
             shortcutType.InvokeMember("TargetPath", BindingFlags.SetProperty, null, shortcut, new object[] { targetPath });
             shortcutType.InvokeMember("Arguments", BindingFlags.SetProperty, null, shortcut, new object[] { arguments });
             shortcutType.InvokeMember("WorkingDirectory", BindingFlags.SetProperty, null, shortcut, new object[] { workingDirectory });
-            shortcutType.InvokeMember("IconLocation", BindingFlags.SetProperty, null, shortcut, new object[] { targetPath + ",0" });
+            shortcutType.InvokeMember("IconLocation", BindingFlags.SetProperty, null, shortcut, new object[] { iconPath + ",0" });
             shortcutType.InvokeMember("Description", BindingFlags.SetProperty, null, shortcut, new object[] { description });
             shortcutType.InvokeMember("Save", BindingFlags.InvokeMethod, null, shortcut, null);
         }

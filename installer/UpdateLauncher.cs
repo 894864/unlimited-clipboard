@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 
-[assembly: System.Reflection.AssemblyTitle("InfiniteClipboard Update Launcher")]
-[assembly: System.Reflection.AssemblyProduct("InfiniteClipboard")]
-[assembly: System.Reflection.AssemblyVersion("1.0.2.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.0.2.0")]
+[assembly: System.Reflection.AssemblyTitle("unlimited clipboard update launcher")]
+[assembly: System.Reflection.AssemblyProduct("unlimited clipboard")]
+[assembly: System.Reflection.AssemblyVersion("1.0.3.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.0.3.0")]
 
-namespace InfiniteClipboardUpdate
+namespace UnlimitedClipboardUpdate
 {
     internal static class Program
     {
@@ -32,7 +32,7 @@ namespace InfiniteClipboardUpdate
             catch (ArgumentException) { }
             catch { return 3; }
 
-            if (Process.GetProcessesByName("InfiniteClipboard").Length > 0) return 4;
+            if (Process.GetProcessesByName("unlimited-clipboard").Length > 0) return 4;
             try
             {
                 Process.Start(new ProcessStartInfo(package) { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(package) });

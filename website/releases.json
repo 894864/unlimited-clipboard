@@ -1,6 +1,6 @@
 ﻿{
-    "version":  "1.0.2",
-    "downloadUrl":  "download/InfiniteClipboard-Setup-1.0.2.exe",
-    "sha256":  "C72F2527A0B2CBF8F760FAECEF9363BF07A87BA26F3191FE2603A3F93AC1202D",
-    "notes":  "Adds a guided installer, custom conflict-checked hotkeys, in-app uninstall, UI font sizes, and usability fixes."
+    "version":  "1.0.3",
+    "downloadUrl":  "download/unlimited-clipboard-setup-v1.0.3.exe",
+    "sha256":  "3B65CAF93015B6534EE94ABC719CB82BDCD368E800245EA9FB39FC31C25A7C34",
+    "notes":  "Renames the application to unlimited clipboard and refreshes its icon."
 }

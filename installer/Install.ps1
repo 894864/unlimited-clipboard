@@ -1,21 +1,21 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 $appName = ([char]0x65E0).ToString() + [char]0x9650 + [char]0x526A + [char]0x8D34 + [char]0x677F
-$installDir = Join-Path $env:LOCALAPPDATA 'Programs\InfiniteClipboard'
-$launchPath = Join-Path $installDir 'Launch.vbs'
+$installDir = Join-Path $env:LOCALAPPDATA 'Programs\unlimited-clipboard'
+$launchPath = Join-Path $installDir 'unlimited-clipboard.vbs'
 $compatLaunchName = ([char]0x542F).ToString() + [char]0x52A8 + $appName + '.vbs'
 $compatLaunchPath = Join-Path $installDir $compatLaunchName
 $programsDir = Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs'
 $menuDir = Join-Path $programsDir $appName
 $desktopLink = Join-Path ([Environment]::GetFolderPath('Desktop')) ($appName + '.lnk')
-$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\InfiniteClipboard'
+$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\unlimited-clipboard'
 
 try {
     New-Item -ItemType Directory -Path $installDir -Force | Out-Null
-    foreach ($file in @('InfiniteClipboard.ps1', 'Launch.vbs', 'Uninstall.ps1')) {
+    foreach ($file in @('unlimited-clipboard.ps1', 'unlimited-clipboard.vbs', 'Uninstall.ps1')) {
         Copy-Item -LiteralPath (Join-Path $PSScriptRoot $file) -Destination (Join-Path $installDir $file) -Force
     }
-    # InfiniteClipboard.ps1 uses this original launcher name when it refreshes the startup entry.
+    # The main script uses this launcher name when it refreshes the startup entry.
     Copy-Item -LiteralPath $launchPath -Destination $compatLaunchPath -Force
 
     $shell = New-Object -ComObject WScript.Shell
@@ -31,7 +31,7 @@ try {
     $uninstallLink.TargetPath = 'powershell.exe'
     $uninstallLink.Arguments = '-NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $installDir 'Uninstall.ps1') + '"'
     $uninstallLink.WorkingDirectory = $installDir
-    $uninstallLink.Description = 'Uninstall InfiniteClipboard'
+    $uninstallLink.Description = 'Uninstall unlimited clipboard'
     $uninstallLink.Save()
 
     $desktop = $shell.CreateShortcut($desktopLink)
@@ -43,7 +43,7 @@ try {
     New-Item -Path $uninstallKey -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name DisplayName -Value $appName -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name DisplayVersion -Value '1.0.2' -PropertyType String -Force | Out-Null
-    New-ItemProperty -Path $uninstallKey -Name Publisher -Value 'InfiniteClipboard' -PropertyType String -Force | Out-Null
+    New-ItemProperty -Path $uninstallKey -Name Publisher -Value 'unlimited clipboard' -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name InstallLocation -Value $installDir -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name UninstallString -Value ('powershell.exe -NoProfile -ExecutionPolicy Bypass -File "' + (Join-Path $installDir 'Uninstall.ps1') + '"') -PropertyType String -Force | Out-Null
     New-ItemProperty -Path $uninstallKey -Name NoModify -Value 1 -PropertyType DWord -Force | Out-Null
@@ -51,7 +51,7 @@ try {
 
     $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
     New-Item -Path $runKey -Force | Out-Null
-    Set-ItemProperty -Path $runKey -Name 'InfiniteClipboard' -Value ('wscript.exe "' + $launchPath + '"')
+    Set-ItemProperty -Path $runKey -Name 'unlimited-clipboard' -Value ('wscript.exe "' + $launchPath + '"')
 
     Start-Process -FilePath 'wscript.exe' -ArgumentList ('"' + $launchPath + '"') -WorkingDirectory $installDir
     Add-Type -AssemblyName System.Windows.Forms

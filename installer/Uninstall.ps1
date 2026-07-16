@@ -1,15 +1,15 @@
-$ErrorActionPreference = 'SilentlyContinue'
+﻿$ErrorActionPreference = 'SilentlyContinue'
 
 $appName = ([char]0x65E0).ToString() + [char]0x9650 + [char]0x526A + [char]0x8D34 + [char]0x677F
 $installDir = $PSScriptRoot
 $runKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Run'
-$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\InfiniteClipboard'
+$uninstallKey = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Uninstall\unlimited-clipboard'
 
 Add-Type -AssemblyName System.Windows.Forms
 $answer = [System.Windows.Forms.MessageBox]::Show('Uninstall ' + $appName + "?`r`n`r`nYour clipboard history in AppData will be kept for a future reinstall.", 'Uninstall ' + $appName, 'YesNo', 'Question')
 if ($answer -ne [System.Windows.Forms.DialogResult]::Yes) { exit 0 }
 
-Remove-ItemProperty -Path $runKey -Name 'InfiniteClipboard' -ErrorAction SilentlyContinue
+Remove-ItemProperty -Path $runKey -Name 'unlimited-clipboard' -ErrorAction SilentlyContinue
 Remove-Item -Path $uninstallKey -Recurse -Force -ErrorAction SilentlyContinue
 
 $shell = New-Object -ComObject WScript.Shell
@@ -24,7 +24,7 @@ if (Test-Path -LiteralPath $desktopLink) {
 $menuDir = Join-Path (Join-Path $env:APPDATA 'Microsoft\Windows\Start Menu\Programs') $appName
 Remove-Item -LiteralPath $menuDir -Recurse -Force -ErrorAction SilentlyContinue
 
-$cleanup = Join-Path $env:TEMP ('InfiniteClipboard-uninstall-' + $PID + '.cmd')
+$cleanup = Join-Path $env:TEMP ('unlimited-clipboard-uninstall-' + $PID + '.cmd')
 $cleanupLines = @('@echo off', 'timeout /t 2 /nobreak >nul', 'rmdir /s /q "' + $installDir + '"', 'del "%~f0"')
 Set-Content -LiteralPath $cleanup -Value $cleanupLines -Encoding Ascii
 Start-Process -FilePath 'cmd.exe' -ArgumentList ('/c "' + $cleanup + '"') -WindowStyle Hidden

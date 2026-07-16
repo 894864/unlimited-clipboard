@@ -23,12 +23,12 @@ using System.Xml.Serialization;
 using Microsoft.Win32;
 using System.Reflection;
 
-[assembly: AssemblyTitle("Unlimited Clipboard")]
-[assembly: AssemblyProduct("Unlimited Clipboard")]
-[assembly: AssemblyVersion("1.0.2.0")]
-[assembly: AssemblyFileVersion("1.0.2.0")]
+[assembly: AssemblyTitle("unlimited clipboard")]
+[assembly: AssemblyProduct("unlimited clipboard")]
+[assembly: AssemblyVersion("1.0.3.0")]
+[assembly: AssemblyFileVersion("1.0.3.0")]
 
-namespace InfiniteClipboard
+namespace UnlimitedClipboard
 {
     public class ClipItem
     {
@@ -92,7 +92,7 @@ namespace InfiniteClipboard
             get
             {
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                return version == null ? "1.0.2" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
+                return version == null ? "1.0.3" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
             }
         }
 
@@ -124,7 +124,7 @@ namespace InfiniteClipboard
                 ServicePointManager.SecurityProtocol = (SecurityProtocolType)3072; // TLS 1.2
                 using (var client = new WebClient())
                 {
-                    client.Headers[HttpRequestHeader.UserAgent] = "InfiniteClipboard/" + CurrentVersionText;
+                    client.Headers[HttpRequestHeader.UserAgent] = "unlimited-clipboard/" + CurrentVersionText;
                     string json = client.DownloadString(feed);
                     Version latest;
                     string versionText = JsonValue(json, "version");
@@ -159,14 +159,14 @@ namespace InfiniteClipboard
         public static string DownloadPackage(UpdateInfo update)
         {
             if (update == null) throw new InvalidOperationException("没有可安装的更新。");
-            string updateDir = Path.Combine(Path.GetTempPath(), "InfiniteClipboard", "updates");
+            string updateDir = Path.Combine(Path.GetTempPath(), "unlimited-clipboard", "updates");
             Directory.CreateDirectory(updateDir);
-            string finalPath = Path.Combine(updateDir, "InfiniteClipboard-Setup-" + DisplayVersion(update.Version) + ".exe");
+            string finalPath = Path.Combine(updateDir, "unlimited-clipboard-setup-v" + DisplayVersion(update.Version) + ".exe");
             string tempPath = finalPath + ".downloading";
             try { if (File.Exists(tempPath)) File.Delete(tempPath); } catch { }
             using (var client = new WebClient())
             {
-                client.Headers[HttpRequestHeader.UserAgent] = "InfiniteClipboard/" + CurrentVersionText;
+                client.Headers[HttpRequestHeader.UserAgent] = "unlimited-clipboard/" + CurrentVersionText;
                 client.DownloadFile(update.DownloadUrl, tempPath);
             }
             string hash;
@@ -275,7 +275,7 @@ namespace InfiniteClipboard
         {
             try
             {
-                if (string.Equals(Path.GetFileName(executablePath), "InfiniteClipboard.exe", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(Path.GetFileName(executablePath), "unlimited-clipboard.exe", StringComparison.OrdinalIgnoreCase))
                 {
                     using (var embedded = Icon.ExtractAssociatedIcon(executablePath))
                     {
@@ -357,7 +357,7 @@ namespace InfiniteClipboard
 
         public Store()
         {
-            Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "InfiniteClipboard");
+            Root = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "unlimited-clipboard");
             ItemDir = Path.Combine(Root, "items");
             IndexPath = Path.Combine(Root, "index.xml");
             Directory.CreateDirectory(ItemDir);
@@ -742,15 +742,15 @@ namespace InfiniteClipboard
         int appliedUiFontSize = 2;
         string appScriptPath;
         const int HOTKEY_ID = 9417;
-        static readonly int SHOW_MESSAGE = Native.RegisterWindowMessage("InfiniteClipboard.ShowMainWindow.v1");
-        static readonly int EXIT_MESSAGE = Native.RegisterWindowMessage("InfiniteClipboard.Exit.v1");
+        static readonly int SHOW_MESSAGE = Native.RegisterWindowMessage("unlimited-clipboard.ShowMainWindow.v1");
+        static readonly int EXIT_MESSAGE = Native.RegisterWindowMessage("unlimited-clipboard.Exit.v1");
 
         public MainForm(string scriptPath, bool startInBackground)
         {
             store = new Store();
             appScriptPath = scriptPath;
             startHidden = startInBackground;
-            Text = "Unlimited Clipboard";
+            Text = "unlimited clipboard";
             int preferredWidth = store.Index.MainWindowWidth >= 780 ? store.Index.MainWindowWidth : 980;
             Width = Math.Max(780, Math.Min(Screen.PrimaryScreen.WorkingArea.Width, preferredWidth));
             Height = 680;
@@ -1644,7 +1644,7 @@ namespace InfiniteClipboard
         {
             tray = new NotifyIcon();
             tray.Icon = appIcon;
-            tray.Text = "Unlimited Clipboard";
+            tray.Text = "unlimited clipboard";
             tray.Visible = true;
             trayMenu = new ContextMenuStrip();
             tray.ContextMenuStrip = trayMenu;
@@ -1684,7 +1684,7 @@ namespace InfiniteClipboard
         {
             UpdateInfo update = availableUpdate;
             if (update == null) return;
-            if (tray != null) tray.ShowBalloonTip(2500, "正在更新 Unlimited Clipboard", "正在下载并校验版本 " + UpdateService.DisplayVersion(update.Version) + "。", ToolTipIcon.Info);
+            if (tray != null) tray.ShowBalloonTip(2500, "正在更新 unlimited clipboard", "正在下载并校验版本 " + UpdateService.DisplayVersion(update.Version) + "。", ToolTipIcon.Info);
             System.Threading.ThreadPool.QueueUserWorkItem(delegate
             {
                 try
@@ -2307,7 +2307,7 @@ namespace InfiniteClipboard
             {
                 using (var key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", false))
                 {
-                    string value = key == null ? null : key.GetValue("InfiniteClipboard") as string;
+                    string value = key == null ? null : key.GetValue("unlimited-clipboard") as string;
                     string launcher = Path.Combine(Path.GetDirectoryName(scriptPath), "启动无限剪贴板.vbs");
                     return value != null && (value.IndexOf(scriptPath, StringComparison.OrdinalIgnoreCase) >= 0 || value.IndexOf(launcher, StringComparison.OrdinalIgnoreCase) >= 0);
                 }
@@ -2335,11 +2335,11 @@ namespace InfiniteClipboard
                             // Legacy PowerShell distribution: use the VBS launcher without a console window.
                             cmd = "wscript.exe \"" + launcher + "\"";
                         }
-                        key.SetValue("InfiniteClipboard", cmd);
+                        key.SetValue("unlimited-clipboard", cmd);
                     }
                     else
                     {
-                        key.DeleteValue("InfiniteClipboard", false);
+                        key.DeleteValue("unlimited-clipboard", false);
                     }
                 }
             }
@@ -2358,7 +2358,7 @@ namespace InfiniteClipboard
         public static void Main(string[] args)
         {
             string exePath = Application.ExecutablePath;
-            try { Native.SetCurrentProcessExplicitAppUserModelID("cn.cetle.UnlimitedClipboard"); } catch { }
+            try { Native.SetCurrentProcessExplicitAppUserModelID("cn.cetle.unlimited-clipboard"); } catch { }
             bool uninstall = args != null && args.Any(x => string.Equals(x, "--uninstall", StringComparison.OrdinalIgnoreCase));
             if (uninstall)
             {
@@ -2377,10 +2377,10 @@ namespace InfiniteClipboard
         public static void Run(string scriptPath, bool startInBackground)
         {
             bool createdNew;
-            singleInstanceMutex = new System.Threading.Mutex(true, @"Global\InfiniteClipboard.SingleInstance.v1", out createdNew);
+            singleInstanceMutex = new System.Threading.Mutex(true, @"Global\unlimited-clipboard.SingleInstance.v1", out createdNew);
             if (!createdNew)
             {
-                int msg = Native.RegisterWindowMessage("InfiniteClipboard.ShowMainWindow.v1");
+                int msg = Native.RegisterWindowMessage("unlimited-clipboard.ShowMainWindow.v1");
                 Native.PostMessage((IntPtr)Native.HWND_BROADCAST, msg, IntPtr.Zero, IntPtr.Zero);
                 return;
             }
@@ -2407,7 +2407,7 @@ namespace InfiniteClipboard
             // Ask an existing tray instance to release the executable before cleanup starts.
             try
             {
-                int exitMessage = Native.RegisterWindowMessage("InfiniteClipboard.Exit.v1");
+                int exitMessage = Native.RegisterWindowMessage("unlimited-clipboard.Exit.v1");
                 Native.PostMessage((IntPtr)Native.HWND_BROADCAST, exitMessage, IntPtr.Zero, IntPtr.Zero);
                 System.Threading.Thread.Sleep(1200);
             }
@@ -2417,9 +2417,9 @@ namespace InfiniteClipboard
             {
                 using (var runKey = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run", true))
                 {
-                    if (runKey != null) runKey.DeleteValue("InfiniteClipboard", false);
+                    if (runKey != null) runKey.DeleteValue("unlimited-clipboard", false);
                 }
-                Registry.CurrentUser.DeleteSubKeyTree(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\InfiniteClipboard", false);
+                Registry.CurrentUser.DeleteSubKeyTree(@"Software\Microsoft\Windows\CurrentVersion\Uninstall\unlimited-clipboard", false);
             }
             catch { }
 
@@ -2435,9 +2435,9 @@ namespace InfiniteClipboard
 
             try
             {
-                string cleanup = Path.Combine(Path.GetTempPath(), "InfiniteClipboard-uninstall-" + Process.GetCurrentProcess().Id + ".cmd");
+                string cleanup = Path.Combine(Path.GetTempPath(), "unlimited-clipboard-uninstall-" + Process.GetCurrentProcess().Id + ".cmd");
                 string updaterPath = Path.Combine(installDir, "UpdateLauncher.exe");
-                foreach (string name in new string[] { "UpdateLauncher.exe", "InfiniteClipboard.ps1", "Launch.vbs", "Uninstall.ps1", "启动无限剪贴板.vbs" })
+                foreach (string name in new string[] { "UpdateLauncher.exe", "unlimited-clipboard.ps1", "unlimited-clipboard.vbs", "Uninstall.ps1", "启动无限剪贴板.vbs" })
                 {
                     try
                     {
@@ -2446,6 +2446,11 @@ namespace InfiniteClipboard
                     }
                     catch { }
                 }
+                try
+                {
+                    foreach (string iconPath in Directory.GetFiles(installDir, "unlimited-clipboard-*.ico")) File.Delete(iconPath);
+                }
+                catch { }
                 string body = "@echo off\r\nfor /l %%i in (1,1,8) do (\r\n  del /f /q \"" + exePath + "\" >nul 2>nul\r\n  del /f /q \"" + updaterPath + "\" >nul 2>nul\r\n  if not exist \"" + exePath + "\" goto done\r\n  timeout /t 1 /nobreak >nul\r\n)\r\n:done\r\nrmdir \"" + installDir + "\" >nul 2>nul\r\ndel \"%~f0\"\r\n";
                 File.WriteAllText(cleanup, body, Encoding.ASCII);
                 var psi = new ProcessStartInfo("cmd.exe", "/c \"" + cleanup + "\"");
@@ -2474,4 +2479,4 @@ if ($CompileOnly) {
     return
 }
 
-[InfiniteClipboard.Program]::Run($PSCommandPath)
+[UnlimitedClipboard.Program]::Run($PSCommandPath)

@@ -1,11 +1,11 @@
-param(
+﻿param(
     [switch]$OpenOutputFolder,
     [string]$UpdateFeedUrl = 'https://unlimited-clipboard.cetle.cn/releases.json'
 )
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$appVersion = '1.0.2'
+$appVersion = '1.0.3'
 $buildDir = Join-Path $root 'build\native'
 $stagingDir = Join-Path $buildDir 'package'
 $outputDir = Join-Path $root 'dist'
@@ -19,17 +19,17 @@ if (-not (Test-Path -LiteralPath $iexpress)) { throw 'IExpress is not available 
 
 New-Item -ItemType Directory -Path $buildDir, $stagingDir, $outputDir, $siteDownloadDir -Force | Out-Null
 
-$psSource = Join-Path $root 'InfiniteClipboard.ps1'
-$csSource = Join-Path $buildDir 'InfiniteClipboard.cs'
-$mainExe = Join-Path $stagingDir 'InfiniteClipboard.exe'
+$psSource = Join-Path $root 'unlimited-clipboard.ps1'
+$csSource = Join-Path $buildDir 'unlimited-clipboard.cs'
+$mainExe = Join-Path $stagingDir 'unlimited-clipboard.exe'
 $setupCs = Join-Path $root 'installer\SetupLauncher.cs'
 $setupExe = Join-Path $stagingDir 'SetupLauncher.exe'
 $updaterCs = Join-Path $root 'installer\UpdateLauncher.cs'
 $updaterExe = Join-Path $stagingDir 'UpdateLauncher.exe'
-$target = Join-Path $outputDir ("InfiniteClipboard-Setup-" + $appVersion + '.exe')
-$legacyTarget = Join-Path $outputDir 'InfiniteClipboard-Setup.exe'
-$sedPath = Join-Path $env:TEMP 'InfiniteClipboard-Native.sed'
-$iconPath = Join-Path $buildDir 'UnlimitedClipboard.ico'
+$target = Join-Path $outputDir ("unlimited-clipboard-setup-v" + $appVersion + '.exe')
+$legacyTarget = Join-Path $outputDir 'unlimited-clipboard-setup.exe'
+$sedPath = Join-Path $env:TEMP 'unlimited-clipboard-native.sed'
+$iconPath = Join-Path $buildDir 'unlimited-clipboard.ico'
 $iconSourcePath = Join-Path $root 'assets\app-icon-12.png'
 
 function Convert-BitmapToIconDib([System.Drawing.Bitmap]$Bitmap) {
@@ -123,7 +123,7 @@ New-AppIcon $iconPath $iconSourcePath
 
 $wrapper = [IO.File]::ReadAllText($psSource)
 $match = [regex]::Match($wrapper, '(?s)\$source\s*=\s*@"\r?\n(?<code>.*?)\r?\n"@\r?\n\r?\nAdd-Type')
-if (-not $match.Success) { throw 'Unable to extract the application source from InfiniteClipboard.ps1.' }
+if (-not $match.Success) { throw 'Unable to extract the application source from unlimited-clipboard.ps1.' }
 $feedForSource = if ([string]::IsNullOrWhiteSpace($UpdateFeedUrl)) { '' } else { $UpdateFeedUrl.Trim() }
 if ($feedForSource -and -not $feedForSource.StartsWith('https://', [StringComparison]::OrdinalIgnoreCase)) { throw 'UpdateFeedUrl must use HTTPS.' }
 $feedForSource = $feedForSource.Replace('\', '\\').Replace('"', '\"')
@@ -135,16 +135,17 @@ function Invoke-Csc([string[]]$Arguments) {
     if ($LASTEXITCODE -ne 0) { throw ($result | Out-String) }
 }
 
-Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $mainExe), ('/win32icon:' + $iconPath), '/main:InfiniteClipboard.Program', '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.Xml.dll', '/reference:System.Core.dll', $csSource)
+Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $mainExe), ('/win32icon:' + $iconPath), '/main:UnlimitedClipboard.Program', '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.Xml.dll', '/reference:System.Core.dll', $csSource)
 Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $setupExe), ('/win32icon:' + $iconPath), '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.dll', $setupCs)
-Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $updaterExe), '/main:InfiniteClipboardUpdate.Program', '/reference:System.dll', $updaterCs)
+Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $updaterExe), '/main:UnlimitedClipboardUpdate.Program', '/reference:System.dll', $updaterCs)
 
 if (-not (Test-Path -LiteralPath $mainExe) -or -not (Test-Path -LiteralPath $setupExe) -or -not (Test-Path -LiteralPath $updaterExe)) { throw 'Native executable compilation did not produce the expected files.' }
+Copy-Item -LiteralPath $iconPath -Destination (Join-Path $stagingDir 'unlimited-clipboard.ico') -Force
 
 if (Test-Path -LiteralPath $target) { Remove-Item -LiteralPath $target -Force -ErrorAction Stop }
 if (Test-Path -LiteralPath $target) { throw 'The previous setup package is still in use. Close any Explorer preview or installer window and run the build again.' }
 if (Test-Path -LiteralPath $legacyTarget) { Remove-Item -LiteralPath $legacyTarget -Force -ErrorAction Stop }
-Get-ChildItem -LiteralPath $outputDir -Filter '~InfiniteClipboard-*' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+Get-ChildItem -LiteralPath $outputDir -Filter '~unlimited-clipboard-*' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 Get-ChildItem -LiteralPath $outputDir -Filter 'RCXC*.tmp' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
 $sourcePath = $stagingDir + '\'
@@ -165,7 +166,7 @@ InstallPrompt=
 DisplayLicense=
 FinishMessage=
 TargetName=$target
-FriendlyName=InfiniteClipboard Setup
+FriendlyName=unlimited clipboard setup
 AppLaunched=SetupLauncher.exe
 PostInstallCmd=<None>
 AdminQuietInstCmd=SetupLauncher.exe
@@ -173,14 +174,16 @@ UserQuietInstCmd=SetupLauncher.exe
 SourceFiles=SourceFiles
 [Strings]
 FILE0="SetupLauncher.exe"
-FILE1="InfiniteClipboard.exe"
+FILE1="unlimited-clipboard.exe"
 FILE2="UpdateLauncher.exe"
+FILE3="unlimited-clipboard.ico"
 [SourceFiles]
 SourceFiles0=$sourcePath
 [SourceFiles0]
 %FILE0%=
 %FILE1%=
 %FILE2%=
+%FILE3%=
 "@
 
 Set-Content -LiteralPath $sedPath -Value $sed -Encoding Default
@@ -191,7 +194,7 @@ Start-Sleep -Seconds 1
 if ((Get-Item -LiteralPath $target).Length -lt 1024) { throw 'The generated setup package is incomplete.' }
 
 Remove-Item -LiteralPath $sedPath -Force -ErrorAction SilentlyContinue
-Get-ChildItem -LiteralPath $outputDir -Filter '~InfiniteClipboard-*' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
+Get-ChildItem -LiteralPath $outputDir -Filter '~unlimited-clipboard-*' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 Get-ChildItem -LiteralPath $outputDir -Filter 'RCXC*.tmp' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
 $package = Get-Item -LiteralPath $target
@@ -201,7 +204,7 @@ $release = [ordered]@{
     version = $appVersion
     downloadUrl = ('download/' + $package.Name)
     sha256 = $hash
-    notes = 'Adds a guided installer, custom conflict-checked hotkeys, in-app uninstall, UI font sizes, and usability fixes.'
+    notes = 'Renames the application to unlimited clipboard and refreshes its icon.'
 }
 $release | ConvertTo-Json | Set-Content -LiteralPath $releaseFeedPath -Encoding UTF8
 Write-Host ("Native setup package created: {0} ({1:N1} MB)" -f $package.FullName, ($package.Length / 1MB))

@@ -1,8 +1,8 @@
 {
   "name": "unlimited-clipboard-site",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
-  "description": "Official website for Unlimited Clipboard.",
+  "description": "Official website for unlimited clipboard.",
   "scripts": {
     "start": "node server.js",
     "check": "node --check server.js"

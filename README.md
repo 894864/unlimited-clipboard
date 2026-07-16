@@ -1,14 +1,14 @@
-﻿# 无限剪贴板
+# 无限剪贴板
 
 一个轻量的开源 Windows 剪贴板历史工具：常驻后台，自动记录文本、图片和文件列表，支持搜索、恢复、收藏、过期清理、自定义全局快捷键、开机启动和在线更新。
 
 ## 下载与安装
 
-从[官方网站](https://unlimited-clipboard.cetle.cn/)下载 `InfiniteClipboard-Setup-1.0.2.exe`。安装向导默认安装到当前用户的软件目录，也可自定义安装位置；安装不需要管理员权限。
+从[官方网站](https://unlimited-clipboard.cetle.cn/)下载 `unlimited-clipboard-setup-v1.0.3.exe`。安装向导默认安装到当前用户的软件目录，也可自定义安装位置；安装不需要管理员权限。
 
 安装完成后会创建桌面和开始菜单入口。程序关闭主窗口后继续驻留系统托盘；只有托盘菜单中的“退出”才会完全停止剪贴板监听。
 
-卸载入口位于软件设置、Windows“已安装的应用”和开始菜单。卸载程序默认保留 `%APPDATA%\InfiniteClipboard` 中的历史数据。
+卸载入口位于软件设置、Windows“已安装的应用”和开始菜单。卸载程序默认保留 `%APPDATA%\unlimited-clipboard` 中的历史数据。
 
 ## 从源码构建
 
@@ -18,12 +18,12 @@
 .\Build-Installer.ps1
 ```
 
-构建脚本会编译原生 Windows EXE，并在 `dist` 中生成 `InfiniteClipboard-Setup-1.0.2.exe`；同时更新网站下载文件和 `website/releases.json` 的 SHA-256。程序、安装向导和卸载流程不会弹出 PowerShell、CMD 或 VBS 窗口。
+构建脚本会编译原生 Windows EXE，并在 `dist` 中生成 `unlimited-clipboard-setup-v1.0.3.exe`；同时更新网站下载文件和 `website/releases.json` 的 SHA-256。程序、安装向导和卸载流程不会弹出 PowerShell、CMD 或 VBS 窗口。
 
 只检查主程序能否编译：
 
 ```powershell
-.\InfiniteClipboard.ps1 -CompileOnly
+.\unlimited-clipboard.ps1 -CompileOnly
 ```
 
 ## 下载网站
@@ -98,7 +98,7 @@
 
 数据默认保存在：
 
-`%APPDATA%\InfiniteClipboard`
+`%APPDATA%\unlimited-clipboard`
 
 ## 设计取舍
 
