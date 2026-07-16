@@ -41,7 +41,16 @@ jobs:
           ssh -p "${DEPLOY_PORT:-22}" "$DEPLOY_USER@$DEPLOY_HOST" 'bash -se' <<'REMOTE'
           set -euo pipefail
           cd /opt/unlimited-clipboard
-          git pull --ff-only origin main
+          for attempt in 1 2 3; do
+            if git -c http.version=HTTP/1.1 pull --ff-only origin main; then
+              break
+            fi
+            if [ "$attempt" -eq 3 ]; then
+              echo "git pull failed after 3 attempts" >&2
+              exit 1
+            fi
+            sleep 5
+          done
           npm ci --omit=dev --prefix website
           pm2 reload ecosystem.config.cjs --only unlimited-clipboard --update-env
           curl --fail --silent --show-error http://127.0.0.1:3001/healthz
