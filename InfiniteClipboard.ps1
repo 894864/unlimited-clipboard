@@ -25,8 +25,8 @@ using System.Reflection;
 
 [assembly: AssemblyTitle("Unlimited Clipboard")]
 [assembly: AssemblyProduct("Unlimited Clipboard")]
-[assembly: AssemblyVersion("1.0.1.0")]
-[assembly: AssemblyFileVersion("1.0.1.0")]
+[assembly: AssemblyVersion("1.0.2.0")]
+[assembly: AssemblyFileVersion("1.0.2.0")]
 
 namespace InfiniteClipboard
 {
@@ -47,7 +47,7 @@ namespace InfiniteClipboard
 
     public class ClipIndex
     {
-        public int SettingsVersion = 5;
+        public int SettingsVersion = 8;
         public List<ClipItem> Items = new List<ClipItem>();
         public int RetentionDays = 7; // 0 = forever
         public bool CaptureText = true;
@@ -62,6 +62,16 @@ namespace InfiniteClipboard
         public string UpdateFeedUrl = UpdateService.DefaultFeedUrl;
         public string LastNotifiedUpdateVersion = "";
         public int ContentSplitterDistance = 0;
+        public int UiFontSize = 2; // 1=small, 2=standard, 3=large, 4=extra large
+        public int CustomHotkeyModifiers = 0;
+        public int CustomHotkeyKey = 0;
+        public int MainWindowWidth = 0;
+        public int ListColumn0Width = 0;
+        public int ListColumn1Width = 0;
+        public int ListColumn2Width = 0;
+        public int ListColumn3Width = 0;
+        public int ListColumn4Width = 0;
+        public int ListColumn5Width = 0;
     }
 
     public class UpdateInfo
@@ -82,7 +92,7 @@ namespace InfiniteClipboard
             get
             {
                 Version version = Assembly.GetExecutingAssembly().GetName().Version;
-                return version == null ? "1.0.1" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
+                return version == null ? "1.0.2" : version.Major + "." + version.Minor + "." + Math.Max(0, version.Build);
             }
         }
 
@@ -188,8 +198,10 @@ namespace InfiniteClipboard
         public const int HWND_BROADCAST = 0xffff;
         public const int MOD_ALT = 0x0001;
         public const int MOD_CONTROL = 0x0002;
+        public const int MOD_SHIFT = 0x0004;
         public const int MOD_NOREPEAT = 0x4000;
-        public const int VK_V = 0x56;
+        public const int VK_0 = 0x30;
+        public const int VK_1 = 0x31;
         public const int CF_UNICODETEXT = 13;
         public const int CF_HDROP = 15;
         public const int CF_DIB = 8;
@@ -259,41 +271,60 @@ namespace InfiniteClipboard
 
     public static class AppIcon
     {
-        public static Icon Create()
+        public static Icon Create(string executablePath)
         {
+            try
+            {
+                if (string.Equals(Path.GetFileName(executablePath), "InfiniteClipboard.exe", StringComparison.OrdinalIgnoreCase))
+                {
+                    using (var embedded = Icon.ExtractAssociatedIcon(executablePath))
+                    {
+                        if (embedded != null) return (Icon)embedded.Clone();
+                    }
+                }
+            }
+            catch { }
+
             using (var bitmap = new Bitmap(64, 64))
             using (var g = Graphics.FromImage(bitmap))
             {
                 g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 g.Clear(Color.Transparent);
                 using (var basePath = RoundedRect(new Rectangle(4, 4, 56, 56), 15))
-                using (var baseBrush = new SolidBrush(Color.FromArgb(43, 103, 202)))
+                using (var baseBrush = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(4, 4, 56, 56), Color.FromArgb(255, 254, 249), Color.FromArgb(239, 233, 222), System.Drawing.Drawing2D.LinearGradientMode.Vertical))
+                using (var edgePen = new Pen(Color.FromArgb(205, 220, 211, 196), 1f))
                 {
                     g.FillPath(baseBrush, basePath);
+                    g.DrawPath(edgePen, basePath);
                 }
-                using (var backPath = RoundedRect(new Rectangle(27, 19, 21, 29), 5))
-                using (var backBrush = new SolidBrush(Color.FromArgb(159, 207, 255)))
+                using (var fold = new System.Drawing.Drawing2D.GraphicsPath())
+                using (var foldBrush = new System.Drawing.Drawing2D.LinearGradientBrush(new Rectangle(42, 4, 18, 20), Color.FromArgb(255, 255, 252), Color.FromArgb(225, 216, 201), System.Drawing.Drawing2D.LinearGradientMode.ForwardDiagonal))
+                using (var foldPen = new Pen(Color.FromArgb(150, 205, 194, 175), 1f))
                 {
-                    g.FillPath(backBrush, backPath);
+                    fold.StartFigure();
+                    fold.AddLine(43, 4, 48, 4);
+                    fold.AddBezier(48, 4, 54, 6, 58, 10, 60, 16);
+                    fold.AddLine(60, 21, 51, 21);
+                    fold.AddBezier(51, 21, 46, 21, 43, 18, 43, 13);
+                    fold.CloseFigure();
+                    g.FillPath(foldBrush, fold);
+                    g.DrawPath(foldPen, fold);
                 }
-                using (var pagePath = RoundedRect(new Rectangle(17, 15, 31, 37), 6))
-                using (var pageBrush = new SolidBrush(Color.White))
+                using (var infinityPath = new System.Drawing.Drawing2D.GraphicsPath())
+                using (var groovePen = new Pen(Color.FromArgb(150, 184, 171, 150), 8f))
+                using (var paperPen = new Pen(Color.FromArgb(255, 250, 246, 237), 5.5f))
                 {
-                    g.FillPath(pageBrush, pagePath);
-                }
-                using (var clipPath = RoundedRect(new Rectangle(24, 10, 17, 12), 5))
-                using (var clipBrush = new SolidBrush(Color.FromArgb(206, 228, 255)))
-                {
-                    g.FillPath(clipBrush, clipPath);
-                }
-                using (var lineBrush = new SolidBrush(Color.FromArgb(75, 138, 224)))
-                using (var line1 = RoundedRect(new Rectangle(23, 28, 18, 3), 1))
-                using (var line2 = RoundedRect(new Rectangle(23, 35, 14, 3), 1))
-                using (var line3 = RoundedRect(new Rectangle(23, 42, 10, 3), 1))
-                {
-                    g.FillPath(lineBrush, line1);
-                    g.FillPath(lineBrush, line2);
-                    g.FillPath(lineBrush, line3);
+                    infinityPath.StartFigure();
+                    infinityPath.AddBezier(15, 34, 20, 23, 27, 23, 32, 34);
+                    infinityPath.AddBezier(32, 34, 37, 45, 44, 45, 49, 34);
+                    infinityPath.AddBezier(49, 34, 44, 23, 37, 23, 32, 34);
+                    infinityPath.AddBezier(32, 34, 27, 45, 20, 45, 15, 34);
+                    groovePen.StartCap = groovePen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    groovePen.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+                    paperPen.StartCap = paperPen.EndCap = System.Drawing.Drawing2D.LineCap.Round;
+                    paperPen.LineJoin = System.Drawing.Drawing2D.LineJoin.Round;
+                    g.DrawPath(groovePen, infinityPath);
+                    g.DrawPath(paperPen, infinityPath);
                 }
                 IntPtr handle = bitmap.GetHicon();
                 try
@@ -366,7 +397,8 @@ namespace InfiniteClipboard
                 if (Index.UpdateFeedUrl == null || (upgradeToV5 && string.IsNullOrWhiteSpace(Index.UpdateFeedUrl))) Index.UpdateFeedUrl = UpdateService.DefaultFeedUrl;
                 if (Index.LastNotifiedUpdateVersion == null) Index.LastNotifiedUpdateVersion = "";
                 if (Index.ContentSplitterDistance < 0) Index.ContentSplitterDistance = 0;
-                Index.SettingsVersion = 5;
+                if (Index.UiFontSize < 1 || Index.UiFontSize > 4) Index.UiFontSize = 2;
+                Index.SettingsVersion = 8;
             }
             catch
             {
@@ -687,14 +719,27 @@ namespace InfiniteClipboard
         Icon appIcon;
         Button settingsButton;
         Label updateBadge;
+        Label mainHotkeyHint;
         UpdateInfo availableUpdate;
         bool checkingForUpdate = false;
+        string lastUpdateStatus = "";
         readonly object updateLock = new object();
         bool isExiting = false;
         bool closeHintShown = false;
         bool suppressCapture = false;
         bool startHidden = false;
         bool hotkeyRegistered = false;
+        int hotkeyErrorCode = 0;
+        string activeHotkeyText = "";
+        int activeHotkeyModifiers = 0;
+        int activeHotkeyKey = 0;
+        string hotkeyWarningText = "";
+        bool listLayoutReady = false;
+        bool suppressListColumnSync = false;
+        int lastListClientWidth = 0;
+        readonly int[] trackedListColumnWidths = new int[6];
+        static readonly int[] MinimumListColumnWidths = new int[] { 32, 50, 140, 105, 55, 52 };
+        int appliedUiFontSize = 2;
         string appScriptPath;
         const int HOTKEY_ID = 9417;
         static readonly int SHOW_MESSAGE = Native.RegisterWindowMessage("InfiniteClipboard.ShowMainWindow.v1");
@@ -706,22 +751,28 @@ namespace InfiniteClipboard
             appScriptPath = scriptPath;
             startHidden = startInBackground;
             Text = "Unlimited Clipboard";
-            Width = 980;
+            int preferredWidth = store.Index.MainWindowWidth >= 780 ? store.Index.MainWindowWidth : 980;
+            Width = Math.Max(780, Math.Min(Screen.PrimaryScreen.WorkingArea.Width, preferredWidth));
             Height = 680;
             MinimumSize = new Size(780, 520);
             StartPosition = FormStartPosition.CenterScreen;
-            appIcon = AppIcon.Create();
+            appIcon = AppIcon.Create(Application.ExecutablePath);
             Icon = appIcon;
             BackColor = Color.FromArgb(242, 246, 252);
             Font = new Font("Microsoft YaHei UI", 9f, FontStyle.Regular);
 
             BuildUi(scriptPath);
+            ApplyUiFontSize();
             Native.AddClipboardFormatListener(Handle);
-            hotkeyRegistered = Native.RegisterHotKey(Handle, HOTKEY_ID, Native.MOD_CONTROL | Native.MOD_ALT | Native.MOD_NOREPEAT, Native.VK_V);
+            TryRegisterHotkey();
             BuildTray();
-            if (!hotkeyRegistered)
+            if (!string.IsNullOrWhiteSpace(hotkeyWarningText))
             {
-                Shown += delegate { BeginInvoke(new Action(delegate { if (tray != null) tray.ShowBalloonTip(5000, "快捷键未启用", "Ctrl+Alt+V 已被其他程序占用。关闭冲突程序后重启无限剪贴板即可恢复。", ToolTipIcon.Warning); })); };
+                Shown += delegate { BeginInvoke(new Action(delegate { if (tray != null) tray.ShowBalloonTip(5000, "自定义快捷键冲突", hotkeyWarningText, ToolTipIcon.Warning); })); };
+            }
+            else if (!hotkeyRegistered)
+            {
+                Shown += delegate { BeginInvoke(new Action(delegate { if (tray != null) tray.ShowBalloonTip(5000, "快捷键未启用", HotkeyStatusText() + " 可在设置里重试。", ToolTipIcon.Warning); })); };
             }
             if (!store.Index.StartupConfigured)
             {
@@ -784,7 +835,8 @@ namespace InfiniteClipboard
                 if (!closeHintShown)
                 {
                     closeHintShown = true;
-                    tray.ShowBalloonTip(1800, "无限剪贴板仍在运行", "窗口已隐藏到系统托盘。按 Ctrl+Alt+V 或双击托盘图标可重新打开。", ToolTipIcon.Info);
+                    string shortcutHint = hotkeyRegistered ? "按 " + activeHotkeyText + " 或" : "可";
+                    tray.ShowBalloonTip(1800, "无限剪贴板仍在运行", "窗口已隐藏到系统托盘。" + shortcutHint + "双击托盘图标重新打开。", ToolTipIcon.Info);
                 }
                 return;
             }
@@ -798,7 +850,185 @@ namespace InfiniteClipboard
         {
             base.OnResize(e);
             PositionToast();
-            AdjustListColumns();
+            if (WindowState == FormWindowState.Normal && store != null && Width >= MinimumSize.Width)
+            {
+                store.Index.MainWindowWidth = Width;
+            }
+        }
+
+        protected override void OnResizeEnd(EventArgs e)
+        {
+            base.OnResizeEnd(e);
+            if (store != null)
+            {
+                SaveListLayout(false);
+                store.Save();
+            }
+        }
+
+        bool TryRegisterHotkey()
+        {
+            hotkeyWarningText = "";
+            if (store.Index.CustomHotkeyModifiers != 0 && store.Index.CustomHotkeyKey != 0)
+            {
+                ReleaseCurrentHotkey();
+                string customText = FormatHotkey(store.Index.CustomHotkeyModifiers, store.Index.CustomHotkeyKey);
+                if (RegisterHotkeyCandidate(store.Index.CustomHotkeyModifiers, store.Index.CustomHotkeyKey, customText))
+                {
+                    RefreshTrayMenu();
+                    return true;
+                }
+                int customError = hotkeyErrorCode;
+                bool fallback = TryRegisterAutomaticHotkey(false);
+                hotkeyWarningText = fallback
+                    ? "自定义快捷键 " + customText + " 已被占用，已临时改用 " + activeHotkeyText + "。"
+                    : "自定义快捷键 " + customText + " 无法注册（Windows 错误 " + customError + "），自动分配也失败。";
+                return fallback;
+            }
+            return TryRegisterAutomaticHotkey(false);
+        }
+
+        bool TryRegisterAutomaticHotkey(bool clearCustom)
+        {
+            if (clearCustom)
+            {
+                store.Index.CustomHotkeyModifiers = 0;
+                store.Index.CustomHotkeyKey = 0;
+                store.Save();
+            }
+            hotkeyWarningText = "";
+            ReleaseCurrentHotkey();
+            int[] keys = new int[] { Native.VK_1, Native.VK_1 + 1, Native.VK_1 + 2, Native.VK_1 + 3, Native.VK_1 + 4, Native.VK_1 + 5, Native.VK_1 + 6, Native.VK_1 + 7, Native.VK_1 + 8, Native.VK_0 };
+            for (int i = 0; i < keys.Length; i++)
+            {
+                string label = FormatHotkey(Native.MOD_CONTROL, keys[i]);
+                if (RegisterHotkeyCandidate(Native.MOD_CONTROL, keys[i], label)) break;
+            }
+            RefreshTrayMenu();
+            return hotkeyRegistered;
+        }
+
+        void ReleaseCurrentHotkey()
+        {
+            if (hotkeyRegistered)
+            {
+                Native.UnregisterHotKey(Handle, HOTKEY_ID);
+            }
+            hotkeyRegistered = false;
+            activeHotkeyText = "";
+            activeHotkeyModifiers = 0;
+            activeHotkeyKey = 0;
+            hotkeyErrorCode = 0;
+        }
+
+        bool RegisterHotkeyCandidate(int modifiers, int key, string label)
+        {
+            if (Native.RegisterHotKey(Handle, HOTKEY_ID, modifiers | Native.MOD_NOREPEAT, key))
+            {
+                hotkeyRegistered = true;
+                activeHotkeyModifiers = modifiers;
+                activeHotkeyKey = key;
+                activeHotkeyText = label;
+                hotkeyErrorCode = 0;
+                return true;
+            }
+            hotkeyErrorCode = Marshal.GetLastWin32Error();
+            return false;
+        }
+
+        bool TryApplyCustomHotkey(int modifiers, int key, out string error)
+        {
+            string candidate = FormatHotkey(modifiers, key);
+            int previousModifiers = activeHotkeyModifiers;
+            int previousKey = activeHotkeyKey;
+            string previousText = activeHotkeyText;
+            ReleaseCurrentHotkey();
+            if (RegisterHotkeyCandidate(modifiers, key, candidate))
+            {
+                store.Index.CustomHotkeyModifiers = modifiers;
+                store.Index.CustomHotkeyKey = key;
+                store.Save();
+                hotkeyWarningText = "";
+                RefreshTrayMenu();
+                error = "";
+                return true;
+            }
+
+            int candidateError = hotkeyErrorCode;
+            if (previousKey != 0 && previousModifiers != 0)
+            {
+                RegisterHotkeyCandidate(previousModifiers, previousKey, previousText);
+            }
+            if (!hotkeyRegistered) TryRegisterAutomaticHotkey(false);
+            RefreshTrayMenu();
+            error = candidateError == 1409
+                ? "快捷键 " + candidate + " 已被其他程序占用，请换一个组合。"
+                : "快捷键 " + candidate + " 注册失败（Windows 错误 " + candidateError + "），原快捷键已恢复。";
+            return false;
+        }
+
+        static int HotkeyModifiersFromKeys(Keys modifiers)
+        {
+            int result = 0;
+            if ((modifiers & Keys.Control) == Keys.Control) result |= Native.MOD_CONTROL;
+            if ((modifiers & Keys.Alt) == Keys.Alt) result |= Native.MOD_ALT;
+            if ((modifiers & Keys.Shift) == Keys.Shift) result |= Native.MOD_SHIFT;
+            return result;
+        }
+
+        static bool IsHotkeyKey(Keys key)
+        {
+            return key != Keys.None && key != Keys.ControlKey && key != Keys.LControlKey && key != Keys.RControlKey
+                && key != Keys.Menu && key != Keys.LMenu && key != Keys.RMenu
+                && key != Keys.ShiftKey && key != Keys.LShiftKey && key != Keys.RShiftKey
+                && key != Keys.Escape && key != Keys.Tab && key != Keys.Enter;
+        }
+
+        static string FormatHotkey(int modifiers, int keyValue)
+        {
+            var parts = new List<string>();
+            if ((modifiers & Native.MOD_CONTROL) != 0) parts.Add("Ctrl");
+            if ((modifiers & Native.MOD_ALT) != 0) parts.Add("Alt");
+            if ((modifiers & Native.MOD_SHIFT) != 0) parts.Add("Shift");
+            Keys key = (Keys)keyValue;
+            string keyText;
+            if (key >= Keys.D0 && key <= Keys.D9) keyText = ((int)key - (int)Keys.D0).ToString();
+            else if (key >= Keys.NumPad0 && key <= Keys.NumPad9) keyText = "Num" + ((int)key - (int)Keys.NumPad0);
+            else keyText = new KeysConverter().ConvertToString(key);
+            parts.Add(keyText);
+            return string.Join("+", parts.ToArray());
+        }
+
+        string HotkeyStatusText()
+        {
+            if (hotkeyRegistered) return activeHotkeyText + " 已启用。";
+            if (hotkeyErrorCode == 1409) return "Ctrl+1 至 Ctrl+0 均被占用（Windows 错误 1409）。";
+            return "快捷键未启用：系统注册失败（Windows 错误 " + hotkeyErrorCode + "）。";
+        }
+
+        float UiFontDelta
+        {
+            get { return Math.Max(1, Math.Min(4, store.Index.UiFontSize)) - 2; }
+        }
+
+        void ApplyUiFontSize()
+        {
+            int target = Math.Max(1, Math.Min(4, store.Index.UiFontSize));
+            float delta = target - appliedUiFontSize;
+            if (Math.Abs(delta) < 0.01f) return;
+            AdjustControlFonts(this, delta);
+            appliedUiFontSize = target;
+            if (list != null) list.Invalidate();
+        }
+
+        void AdjustControlFonts(Control control, float delta)
+        {
+            foreach (Control child in control.Controls) AdjustControlFonts(child, delta);
+            Font oldFont = control.Font;
+            if (oldFont != null)
+            {
+                control.Font = new Font(oldFont.FontFamily, Math.Max(6f, oldFont.Size + delta), oldFont.Style, oldFont.Unit);
+            }
         }
 
         void BuildUi(string scriptPath)
@@ -860,7 +1090,6 @@ namespace InfiniteClipboard
             contentSplitter.BackColor = Color.FromArgb(218, 229, 244);
             contentSplitter.Panel1MinSize = 150;
             contentSplitter.Panel2MinSize = 120;
-            contentSplitter.Cursor = Cursors.HSplit;
             contentSplitter.SplitterMoved += delegate
             {
                 if (contentSplitter.SplitterDistance > 0)
@@ -895,17 +1124,27 @@ namespace InfiniteClipboard
             var listFilterBar = new TableLayoutPanel();
             listFilterBar.Dock = DockStyle.Fill;
             listFilterBar.Padding = new Padding(0, 0, 0, 6);
-            listFilterBar.ColumnCount = 3;
-            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 78));
-            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 12));
+            listFilterBar.ColumnCount = 6;
+            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 92));
+            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 18));
             listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 18));
+            listFilterBar.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 126));
             listHost.Controls.Add(listFilterBar, 0, 0);
 
-            typeFilter = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(248, 250, 253), ForeColor = Color.FromArgb(45, 55, 72) };
+            var filterLabel = new Label { Text = "筛选：", AutoSize = true, Anchor = AnchorStyles.Left, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(92, 105, 125), Margin = new Padding(0), Padding = new Padding(0, 2, 0, 0) };
+            listFilterBar.Controls.Add(filterLabel, 0, 0);
+            typeFilter = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(248, 250, 253), ForeColor = Color.FromArgb(45, 55, 72), Margin = new Padding(0, 2, 0, 2) };
             typeFilter.Items.AddRange(new object[] { "全部", "文本", "图片", "文件", "收藏" });
             typeFilter.SelectedIndex = 0;
             typeFilter.SelectedIndexChanged += delegate { RefreshList(); };
-            listFilterBar.Controls.Add(typeFilter, 0, 0);
+            listFilterBar.Controls.Add(typeFilter, 1, 0);
+            mainHotkeyHint = new Label { Text = "快捷键：未启用", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, ForeColor = Color.FromArgb(92, 105, 125), Margin = new Padding(0), Padding = new Padding(0, 2, 0, 0) };
+            listFilterBar.Controls.Add(mainHotkeyHint, 3, 0);
+            var resetColumnWidths = new Button { Text = "恢复默认列宽", Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(232, 238, 248), ForeColor = Color.FromArgb(47, 83, 142), FlatAppearance = { BorderSize = 0 }, Margin = new Padding(0) };
+            resetColumnWidths.Click += delegate { RestoreDefaultListColumns(); };
+            listFilterBar.Controls.Add(resetColumnWidths, 5, 0);
 
             list = new ListView();
             list.Dock = DockStyle.Fill;
@@ -932,9 +1171,11 @@ namespace InfiniteClipboard
             list.DrawSubItem += DrawListSubItem;
             list.KeyDown += ListKeyDown;
             list.MouseClick += ListMouseClick;
-            list.Resize += delegate { AdjustListColumns(); };
+            list.ColumnWidthChanging += ListColumnWidthChanging;
+            list.ColumnWidthChanged += ListColumnWidthChanged;
+            list.Resize += ListResized;
+            list.HandleCreated += delegate { BeginInvoke(new Action(InitializeListColumns)); };
             listHost.Controls.Add(list, 0, 1);
-            AdjustListColumns();
 
             var previewHost = new TableLayoutPanel();
             previewHost.Dock = DockStyle.Fill;
@@ -1029,10 +1270,10 @@ namespace InfiniteClipboard
                 form.FormBorderStyle = FormBorderStyle.Sizable;
                 form.MaximizeBox = true;
                 form.MinimizeBox = false;
-                form.ClientSize = new Size(700, 745);
-                form.MinimumSize = new Size(640, 690);
+                form.ClientSize = new Size(700, 730);
+                form.MinimumSize = new Size(640, 720);
                 form.BackColor = Color.FromArgb(242, 246, 252);
-                form.Font = new Font("Microsoft YaHei UI", 9f);
+                form.Font = new Font("Microsoft YaHei UI", 9f + UiFontDelta);
 
                 var layout = new TableLayoutPanel();
                 layout.Dock = DockStyle.Fill;
@@ -1042,8 +1283,8 @@ namespace InfiniteClipboard
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 80));
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110));
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 110));
-                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 166));
-                layout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 220));
+                layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 130));
                 layout.RowStyles.Add(new RowStyle(SizeType.Absolute, 46));
                 form.Controls.Add(layout);
 
@@ -1101,12 +1342,13 @@ namespace InfiniteClipboard
                 layout.Controls.Add(storageGroup, 0, 2);
 
                 var appGroup = new GroupBox { Text = "运行与提示", Dock = DockStyle.Fill };
-                var appPanel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(14, 12, 14, 10), ColumnCount = 2, RowCount = 4 };
+                var appPanel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(14, 10, 14, 10), ColumnCount = 2, RowCount = 5 };
                 appPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
                 appPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50));
-                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 36));
-                appPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 32));
+                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 34));
+                appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 40));
                 appPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 38));
                 appGroup.Controls.Add(appPanel);
                 var pause = new CheckBox { Text = "暂停记录剪贴板", AutoSize = true, Checked = store.Index.PauseCapture, Margin = new Padding(4, 7, 16, 4) };
@@ -1117,39 +1359,104 @@ namespace InfiniteClipboard
                 appPanel.Controls.Add(startup, 1, 0);
                 appPanel.Controls.Add(notify, 0, 1);
                 appPanel.Controls.Add(autoUpdate, 1, 1);
-                var appHint = new Label { Text = "说明：选中后，登录 Windows 会自动开始记录剪贴板并最小化到系统托盘。自动更新会在后台检查新版本；发现后仅提示，需在下方点击“更新本软件”才会下载安装。", ForeColor = Color.FromArgb(92, 105, 125), Dock = DockStyle.Fill, TextAlign = ContentAlignment.TopLeft, AutoEllipsis = false, Padding = new Padding(3, 6, 0, 0) };
-                appPanel.SetColumnSpan(appHint, 2);
-                appPanel.Controls.Add(appHint, 0, 2);
+                var fontLabel = new Label { Text = "界面字号", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(4, 0, 0, 0) };
+                var fontChoice = new ComboBox { DropDownStyle = ComboBoxStyle.DropDownList, Dock = DockStyle.Left, Width = 190, Margin = new Padding(4, 3, 0, 0) };
+                fontChoice.Items.AddRange(new object[] { "小（8 磅）", "标准（9 磅，默认）", "大（10 磅）", "特大（11 磅）" });
+                fontChoice.SelectedIndex = Math.Max(0, Math.Min(3, store.Index.UiFontSize - 1));
+                appPanel.Controls.Add(fontLabel, 0, 2);
+                appPanel.Controls.Add(fontChoice, 1, 2);
+
+                var hotkeyRow = new TableLayoutPanel { Dock = DockStyle.Fill, ColumnCount = 4, RowCount = 1, Margin = new Padding(0) };
+                hotkeyRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 112));
+                hotkeyRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 130));
+                hotkeyRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
+                hotkeyRow.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 116));
+                var hotkeyLabel = new Label { Text = "快捷启动分配", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(4, 0, 0, 0) };
+                var hotkeyInput = new TextBox { Text = hotkeyRegistered ? activeHotkeyText : "未启用", ReadOnly = true, ShortcutsEnabled = false, Dock = DockStyle.Fill, TextAlign = HorizontalAlignment.Center, BackColor = Color.White, ForeColor = hotkeyRegistered ? Color.FromArgb(47, 83, 142) : Color.FromArgb(181, 72, 54), Margin = new Padding(0, 7, 6, 6) };
+                var hotkeyHint = new Label { Text = "（软件自动选择首个可用组合）", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, ForeColor = Color.FromArgb(92, 105, 125) };
+                new ToolTip().SetToolTip(hotkeyInput, "点击输入框，然后按下包含 Ctrl 或 Alt 的快捷键组合");
+                hotkeyInput.Enter += delegate { hotkeyInput.SelectAll(); };
+                hotkeyInput.KeyDown += delegate(object sender, KeyEventArgs e)
+                {
+                    e.Handled = true;
+                    e.SuppressKeyPress = true;
+                    if (e.KeyCode == Keys.Escape)
+                    {
+                        hotkeyInput.Text = hotkeyRegistered ? activeHotkeyText : "未启用";
+                        return;
+                    }
+                    if (!IsHotkeyKey(e.KeyCode)) return;
+                    int modifiers = HotkeyModifiersFromKeys(e.Modifiers);
+                    if ((modifiers & (Native.MOD_CONTROL | Native.MOD_ALT)) == 0)
+                    {
+                        hotkeyInput.Text = hotkeyRegistered ? activeHotkeyText : "未启用";
+                        MessageBox.Show(form, "快捷键必须包含 Ctrl 或 Alt；可同时使用 Shift。", "快捷键无效", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
+                    string error;
+                    if (TryApplyCustomHotkey(modifiers, (int)e.KeyCode, out error))
+                    {
+                        hotkeyInput.Text = activeHotkeyText;
+                        hotkeyInput.ForeColor = Color.FromArgb(45, 125, 82);
+                    }
+                    else
+                    {
+                        hotkeyInput.Text = hotkeyRegistered ? activeHotkeyText : "未启用";
+                        hotkeyInput.ForeColor = hotkeyRegistered ? Color.FromArgb(47, 83, 142) : Color.FromArgb(181, 72, 54);
+                        MessageBox.Show(form, error, "快捷键冲突", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    }
+                    hotkeyInput.SelectAll();
+                };
+                var retryHotkey = new Button { Text = "重新分配", Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(232, 238, 248), ForeColor = Color.FromArgb(47, 83, 142), FlatAppearance = { BorderSize = 0 }, Margin = new Padding(4, 2, 0, 2) };
+                retryHotkey.Click += delegate
+                {
+                    bool allocated = TryRegisterAutomaticHotkey(true);
+                    hotkeyInput.Text = allocated ? activeHotkeyText : "未启用";
+                    hotkeyInput.ForeColor = allocated ? Color.FromArgb(45, 125, 82) : Color.FromArgb(181, 72, 54);
+                    if (!allocated) MessageBox.Show(form, HotkeyStatusText(), "快捷键分配失败", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                };
+                hotkeyRow.Controls.Add(hotkeyLabel, 0, 0);
+                hotkeyRow.Controls.Add(hotkeyInput, 1, 0);
+                hotkeyRow.Controls.Add(hotkeyHint, 2, 0);
+                hotkeyRow.Controls.Add(retryHotkey, 3, 0);
+                appPanel.SetColumnSpan(hotkeyRow, 2);
+                appPanel.Controls.Add(hotkeyRow, 0, 3);
                 var clearUnfavorite = new Button { Text = "清空未收藏记录…", Dock = DockStyle.Left, Width = 158, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(254, 239, 239), ForeColor = Color.FromArgb(178, 62, 62), FlatAppearance = { BorderSize = 0 }, Margin = new Padding(3, 2, 0, 2) };
                 clearUnfavorite.Click += delegate { ClearUnfavorite(); };
                 appPanel.SetColumnSpan(clearUnfavorite, 2);
-                appPanel.Controls.Add(clearUnfavorite, 0, 3);
+                appPanel.Controls.Add(clearUnfavorite, 0, 4);
                 layout.Controls.Add(appGroup, 0, 3);
 
                 var updateGroup = new GroupBox { Text = "软件更新", Dock = DockStyle.Fill };
-                var updatePanel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(14, 10, 14, 9), ColumnCount = 2, RowCount = 4 };
+                var updatePanel = new TableLayoutPanel { Dock = DockStyle.Fill, Padding = new Padding(14, 10, 14, 9), ColumnCount = 3, RowCount = 3 };
                 updatePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
                 updatePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120));
+                updatePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 96));
                 updatePanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 28));
                 updatePanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-                updatePanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 30));
-                updatePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
+                updatePanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 26));
                 var updateStatus = new Label { Text = UpdateStatusText(), Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleLeft, ForeColor = Color.FromArgb(48, 61, 80) };
                 updatePanel.Controls.Add(updateStatus, 0, 0);
-                updatePanel.SetColumnSpan(updateStatus, 2);
-                var updateFeed = new TextBox { Text = store.Index.UpdateFeedUrl ?? "", Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, ForeColor = Color.FromArgb(53, 65, 82), Font = new Font("Segoe UI", 8.5f) };
+                updatePanel.SetColumnSpan(updateStatus, 3);
+                var updateFeed = new TextBox { Text = store.Index.UpdateFeedUrl ?? "", Dock = DockStyle.Fill, BorderStyle = BorderStyle.FixedSingle, BackColor = Color.White, ForeColor = Color.FromArgb(53, 65, 82), Font = new Font("Segoe UI", 8.5f + UiFontDelta) };
                 new ToolTip().SetToolTip(updateFeed, "更新发布地址（HTTPS 的 releases.json 链接）");
                 updatePanel.Controls.Add(updateFeed, 0, 1);
-                updatePanel.SetColumnSpan(updateFeed, 2);
-                var checkUpdate = new Button { Text = "检查更新", Dock = DockStyle.Right, Width = 102, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(232, 238, 248), ForeColor = Color.FromArgb(47, 83, 142), FlatAppearance = { BorderSize = 0 } };
-                var installUpdate = new Button { Text = "更新本软件", Dock = DockStyle.Right, Width = 112, Visible = availableUpdate != null, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(48, 104, 199), ForeColor = Color.White, FlatAppearance = { BorderSize = 0 } };
-                checkUpdate.Click += delegate { store.Index.UpdateFeedUrl = (updateFeed.Text ?? "").Trim(); store.Save(); updateStatus.Text = "正在检查更新…"; StartUpdateCheck(true, delegate { updateStatus.Text = UpdateStatusText(); installUpdate.Visible = availableUpdate != null; }); };
+                var checkUpdate = new Button { Text = "检查更新", Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(232, 238, 248), ForeColor = Color.FromArgb(47, 83, 142), FlatAppearance = { BorderSize = 0 }, Margin = new Padding(8, 0, 0, 0) };
+                var installUpdate = new Button { Text = "更新本软件", Dock = DockStyle.Fill, Visible = availableUpdate != null, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(48, 104, 199), ForeColor = Color.White, FlatAppearance = { BorderSize = 0 }, Margin = new Padding(8, 2, 0, 0) };
+                var uninstallButton = new Button { Text = "卸载", Dock = DockStyle.Fill, FlatStyle = FlatStyle.Flat, BackColor = Color.FromArgb(254, 239, 239), ForeColor = Color.FromArgb(178, 62, 62), FlatAppearance = { BorderSize = 0 }, Margin = new Padding(8, 0, 0, 0) };
+                checkUpdate.Click += delegate { store.Index.UpdateFeedUrl = (updateFeed.Text ?? "").Trim(); store.Save(); lastUpdateStatus = ""; updateStatus.Text = "正在检查更新…"; StartUpdateCheck(true, delegate { if (!form.IsDisposed) { updateStatus.Text = UpdateStatusText(); installUpdate.Visible = availableUpdate != null; } }); };
                 installUpdate.Click += delegate { InstallAvailableUpdate(form, updateStatus, installUpdate, checkUpdate); };
-                updatePanel.Controls.Add(checkUpdate, 0, 2);
-                updatePanel.Controls.Add(installUpdate, 1, 2);
-                var updateHint = new Label { Text = "当前版本 " + UpdateService.CurrentVersionText + "。更新文件会经过 SHA-256 校验；安装时程序会退出并在完成后自动重启。", Dock = DockStyle.Fill, ForeColor = Color.FromArgb(92, 105, 125), TextAlign = ContentAlignment.MiddleLeft };
+                uninstallButton.Click += delegate
+                {
+                    try { Process.Start(new ProcessStartInfo(Application.ExecutablePath, "--uninstall") { UseShellExecute = true, WorkingDirectory = Path.GetDirectoryName(Application.ExecutablePath) }); }
+                    catch (Exception ex) { MessageBox.Show(form, "无法启动卸载程序：" + ex.Message, "卸载", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+                };
+                updatePanel.Controls.Add(checkUpdate, 1, 1);
+                updatePanel.Controls.Add(uninstallButton, 2, 1);
+                updatePanel.Controls.Add(installUpdate, 2, 2);
+                var updateHint = new Label { Text = "当前安装版本：" + UpdateService.CurrentVersionText + " · 更新包经 SHA-256 校验，完成后由安装向导启动。", Dock = DockStyle.Fill, ForeColor = Color.FromArgb(92, 105, 125), TextAlign = ContentAlignment.MiddleLeft, AutoEllipsis = true, Padding = new Padding(0) };
                 updatePanel.SetColumnSpan(updateHint, 2);
-                updatePanel.Controls.Add(updateHint, 0, 3);
+                updatePanel.Controls.Add(updateHint, 0, 2);
                 updateGroup.Controls.Add(updatePanel);
                 layout.Controls.Add(updateGroup, 0, 4);
 
@@ -1182,9 +1489,11 @@ namespace InfiniteClipboard
                     store.Index.NotifyOnCapture = notify.Checked;
                     store.Index.AutoUpdate = autoUpdate.Checked;
                     store.Index.UpdateFeedUrl = (updateFeed.Text ?? "").Trim();
+                    store.Index.UiFontSize = fontChoice.SelectedIndex + 1;
                     SetStartup(appScriptPath, startup.Checked);
                     store.Index.StartupConfigured = true;
                     store.Save();
+                    ApplyUiFontSize();
                     store.CleanupExpired();
                     RefreshList();
                 }
@@ -1193,10 +1502,11 @@ namespace InfiniteClipboard
 
         string UpdateStatusText()
         {
-            if (checkingForUpdate) return "正在检查更新… 当前版本 " + UpdateService.CurrentVersionText;
-            if (availableUpdate != null) return "最新版本 " + UpdateService.DisplayVersion(availableUpdate.Version) + "，当前版本 " + UpdateService.CurrentVersionText;
-            if (string.IsNullOrWhiteSpace(store.Index.UpdateFeedUrl)) return "当前版本 " + UpdateService.CurrentVersionText + "；尚未配置更新发布地址。";
-            return "当前版本 " + UpdateService.CurrentVersionText + "；可点击“检查更新”获取最新版本。";
+            if (checkingForUpdate) return "正在检查更新…";
+            if (availableUpdate != null) return "发现新版本 " + UpdateService.DisplayVersion(availableUpdate.Version) + "，可以下载安装。";
+            if (!string.IsNullOrWhiteSpace(lastUpdateStatus)) return lastUpdateStatus;
+            if (string.IsNullOrWhiteSpace(store.Index.UpdateFeedUrl)) return "尚未配置更新发布地址。";
+            return "尚未检查更新；点击网址框右侧的“检查更新”。";
         }
 
         void StartUpdateCheck(bool userInitiated, Action completed)
@@ -1222,6 +1532,7 @@ namespace InfiniteClipboard
                     BeginInvoke(new Action(delegate
                     {
                         checkingForUpdate = false;
+                        if (!string.IsNullOrWhiteSpace(message)) lastUpdateStatus = message;
                         if (result != null)
                         {
                             availableUpdate = result;
@@ -1343,15 +1654,25 @@ namespace InfiniteClipboard
 
         void RefreshTrayMenu()
         {
+            UpdateMainHotkeyHint();
             if (trayMenu == null) return;
             trayMenu.Items.Clear();
-            trayMenu.Items.Add("打开（Ctrl+Alt+V）", null, delegate { ShowAndActivate(); });
+            trayMenu.Items.Add(hotkeyRegistered ? "打开（" + activeHotkeyText + "）" : "打开（快捷键未启用）", null, delegate { ShowAndActivate(); });
+            if (!hotkeyRegistered)
+            {
+                var retryItem = trayMenu.Items.Add("重试分配 Ctrl+数字快捷键", null, delegate
+                {
+                    bool ok = TryRegisterHotkey();
+                    if (tray != null) tray.ShowBalloonTip(3500, ok ? "快捷键已启用" : "快捷键仍未启用", HotkeyStatusText(), ok ? ToolTipIcon.Info : ToolTipIcon.Warning);
+                });
+                retryItem.ForeColor = Color.FromArgb(181, 72, 54);
+            }
             if (availableUpdate != null)
             {
                 string version = UpdateService.DisplayVersion(availableUpdate.Version);
                 var updateItem = trayMenu.Items.Add("新版本 " + version + " · 更新并重启", null, delegate { InstallAvailableUpdateFromTray(); });
                 updateItem.ForeColor = Color.FromArgb(194, 52, 52);
-                updateItem.Font = new Font("Microsoft YaHei UI", 9f, FontStyle.Bold);
+                updateItem.Font = new Font("Microsoft YaHei UI", 9f + UiFontDelta, FontStyle.Bold);
             }
             trayMenu.Items.Add("暂停/继续记录", null, delegate { store.Index.PauseCapture = !store.Index.PauseCapture; store.Save(); RefreshList(); });
             trayMenu.Items.Add("打开数据目录", null, delegate { Process.Start(store.Root); });
@@ -1390,17 +1711,169 @@ namespace InfiniteClipboard
             search.Focus();
         }
 
-        void AdjustListColumns()
+        void InitializeListColumns()
         {
-            if (list == null || list.Columns.Count < 6 || list.ClientSize.Width <= 0) return;
-            list.Columns[0].Width = 36;
-            list.Columns[1].Width = 60;
-            list.Columns[3].Width = 128;
-            list.Columns[4].Width = 70;
-            list.Columns[5].Width = 58;
-            int fixedWidth = list.Columns[0].Width + list.Columns[1].Width + list.Columns[3].Width + list.Columns[4].Width + list.Columns[5].Width;
-            int previewWidth = list.ClientSize.Width - fixedWidth - SystemInformation.VerticalScrollBarWidth - 6;
-            list.Columns[2].Width = Math.Max(160, previewWidth);
+            if (list == null || list.IsDisposed || list.Columns.Count < 6 || list.ClientSize.Width <= 0) return;
+            suppressListColumnSync = true;
+            try
+            {
+                int[] saved = GetSavedListColumnWidths();
+                bool valid = true;
+                for (int i = 0; i < saved.Length; i++)
+                {
+                    if (saved[i] < MinimumListColumnWidths[i]) { valid = false; break; }
+                }
+                if (valid)
+                {
+                    for (int i = 0; i < 6; i++) list.Columns[i].Width = saved[i];
+                    FitSavedColumnsToCurrentList();
+                }
+                else
+                {
+                    ApplyDefaultListColumns();
+                }
+                CaptureCurrentListLayout();
+                listLayoutReady = true;
+                SaveListLayout(true);
+            }
+            finally { suppressListColumnSync = false; }
+            UpdateMainHotkeyHint();
+        }
+
+        void ApplyDefaultListColumns()
+        {
+            int[] defaults = new int[] { 36, 60, 0, 128, 70, 58 };
+            int fixedWidth = defaults[0] + defaults[1] + defaults[3] + defaults[4] + defaults[5];
+            defaults[2] = Math.Max(MinimumListColumnWidths[2], list.ClientSize.Width - fixedWidth);
+            for (int i = 0; i < 6; i++) list.Columns[i].Width = defaults[i];
+        }
+
+        void FitSavedColumnsToCurrentList()
+        {
+            int total = 0;
+            for (int i = 0; i < 6; i++) total += list.Columns[i].Width;
+            int difference = list.ClientSize.Width - total;
+            if (difference >= 0)
+            {
+                list.Columns[2].Width += difference;
+                return;
+            }
+
+            int remaining = -difference;
+            int[] shrinkOrder = new int[] { 2, 3, 1, 4, 5, 0 };
+            foreach (int index in shrinkOrder)
+            {
+                int available = Math.Max(0, list.Columns[index].Width - MinimumListColumnWidths[index]);
+                int reduction = Math.Min(available, remaining);
+                list.Columns[index].Width -= reduction;
+                remaining -= reduction;
+                if (remaining <= 0) break;
+            }
+        }
+
+        void RestoreDefaultListColumns()
+        {
+            if (list == null || list.Columns.Count < 6) return;
+            suppressListColumnSync = true;
+            try
+            {
+                Rectangle working = Screen.FromControl(this).WorkingArea;
+                Width = Math.Max(MinimumSize.Width, Math.Min(980, working.Width));
+                PerformLayout();
+                ApplyDefaultListColumns();
+                CaptureCurrentListLayout();
+                listLayoutReady = true;
+                SaveListLayout(true);
+            }
+            finally { suppressListColumnSync = false; }
+            ShowToast("已恢复默认列宽");
+        }
+
+        void ListColumnWidthChanging(object sender, ColumnWidthChangingEventArgs e)
+        {
+            if (!listLayoutReady || suppressListColumnSync || e.ColumnIndex < 0 || e.ColumnIndex >= 6) return;
+            int current = trackedListColumnWidths[e.ColumnIndex];
+            int minimumFromWindow = current - Math.Max(0, Width - MinimumSize.Width);
+            int minimum = Math.Max(MinimumListColumnWidths[e.ColumnIndex], minimumFromWindow);
+            int maximum = current + Math.Max(0, Screen.FromControl(this).WorkingArea.Width - Width);
+            e.NewWidth = Math.Max(minimum, Math.Min(maximum, e.NewWidth));
+        }
+
+        void ListColumnWidthChanged(object sender, ColumnWidthChangedEventArgs e)
+        {
+            if (!listLayoutReady || suppressListColumnSync || e.ColumnIndex < 0 || e.ColumnIndex >= 6) return;
+            int oldWidth = trackedListColumnWidths[e.ColumnIndex];
+            int delta = list.Columns[e.ColumnIndex].Width - oldWidth;
+            if (delta == 0) return;
+
+            suppressListColumnSync = true;
+            try
+            {
+                Rectangle working = Screen.FromControl(this).WorkingArea;
+                int targetWidth = Math.Max(MinimumSize.Width, Math.Min(working.Width, Width + delta));
+                int actualDelta = targetWidth - Width;
+                if (actualDelta != delta) list.Columns[e.ColumnIndex].Width = oldWidth + actualDelta;
+                Width = targetWidth;
+                PerformLayout();
+                CaptureCurrentListLayout();
+                SaveListLayout(true);
+            }
+            finally { suppressListColumnSync = false; }
+        }
+
+        void ListResized(object sender, EventArgs e)
+        {
+            if (list == null || list.ClientSize.Width <= 0) return;
+            if (!listLayoutReady || suppressListColumnSync)
+            {
+                lastListClientWidth = list.ClientSize.Width;
+                return;
+            }
+            int delta = list.ClientSize.Width - lastListClientWidth;
+            if (delta == 0) return;
+            suppressListColumnSync = true;
+            try
+            {
+                list.Columns[2].Width = Math.Max(MinimumListColumnWidths[2], list.Columns[2].Width + delta);
+                CaptureCurrentListLayout();
+                SaveListLayout(false);
+            }
+            finally { suppressListColumnSync = false; }
+        }
+
+        void CaptureCurrentListLayout()
+        {
+            if (list == null || list.Columns.Count < 6) return;
+            for (int i = 0; i < 6; i++) trackedListColumnWidths[i] = list.Columns[i].Width;
+            lastListClientWidth = list.ClientSize.Width;
+        }
+
+        int[] GetSavedListColumnWidths()
+        {
+            return new int[] {
+                store.Index.ListColumn0Width, store.Index.ListColumn1Width, store.Index.ListColumn2Width,
+                store.Index.ListColumn3Width, store.Index.ListColumn4Width, store.Index.ListColumn5Width
+            };
+        }
+
+        void SaveListLayout(bool writeToDisk)
+        {
+            if (store == null || list == null || list.Columns.Count < 6) return;
+            store.Index.MainWindowWidth = WindowState == FormWindowState.Normal ? Width : store.Index.MainWindowWidth;
+            store.Index.ListColumn0Width = list.Columns[0].Width;
+            store.Index.ListColumn1Width = list.Columns[1].Width;
+            store.Index.ListColumn2Width = list.Columns[2].Width;
+            store.Index.ListColumn3Width = list.Columns[3].Width;
+            store.Index.ListColumn4Width = list.Columns[4].Width;
+            store.Index.ListColumn5Width = list.Columns[5].Width;
+            if (writeToDisk) store.Save();
+        }
+
+        void UpdateMainHotkeyHint()
+        {
+            if (mainHotkeyHint == null) return;
+            mainHotkeyHint.Text = "快捷键：" + (hotkeyRegistered ? activeHotkeyText : "未启用");
+            mainHotkeyHint.ForeColor = hotkeyRegistered ? Color.FromArgb(71, 91, 121) : Color.FromArgb(181, 72, 54);
         }
 
         void DrawListHeader(object sender, DrawListViewColumnHeaderEventArgs e)
@@ -1411,7 +1884,7 @@ namespace InfiniteClipboard
                 e.Graphics.FillRectangle(background, e.Bounds);
                 e.Graphics.DrawLine(divider, e.Bounds.Left, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
             }
-            using (var font = new Font("Microsoft YaHei UI", 8.5f, FontStyle.Bold))
+            using (var font = new Font("Microsoft YaHei UI", 8.5f + UiFontDelta, FontStyle.Bold))
             {
                 TextRenderer.DrawText(e.Graphics, e.Header.Text, font, Rectangle.Inflate(e.Bounds, -8, 0), Color.FromArgb(94, 108, 130), TextFormatFlags.Left | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
             }
@@ -1432,7 +1905,7 @@ namespace InfiniteClipboard
             var flags = TextFormatFlags.SingleLine | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix;
             if (e.ColumnIndex == 0 || e.ColumnIndex == 5) flags |= TextFormatFlags.HorizontalCenter;
             else flags |= TextFormatFlags.Left;
-            Font font = (e.ColumnIndex == 0 || e.ColumnIndex == 5) ? new Font("Segoe UI Symbol", 10f, FontStyle.Regular) : new Font("Microsoft YaHei UI", 9f, FontStyle.Regular);
+            Font font = (e.ColumnIndex == 0 || e.ColumnIndex == 5) ? new Font("Segoe UI Symbol", 10f + UiFontDelta, FontStyle.Regular) : new Font("Microsoft YaHei UI", 9f + UiFontDelta, FontStyle.Regular);
             TextRenderer.DrawText(e.Graphics, e.SubItem.Text, font, Rectangle.Inflate(e.Bounds, -8, 0), foreground, flags);
             font.Dispose();
         }
@@ -1928,7 +2401,7 @@ namespace InfiniteClipboard
         static void Uninstall(string exePath)
         {
             string appName = "无限剪贴板";
-            DialogResult answer = MessageBox.Show("确定要卸载“" + appName + "”吗？\r\n\r\n剪贴板历史数据会保留，方便以后重新安装后继续使用。", "卸载" + appName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            DialogResult answer = MessageBox.Show("确定要卸载本软件吗？", "卸载" + appName, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer != DialogResult.Yes) return;
 
             // Ask an existing tray instance to release the executable before cleanup starts.
@@ -1963,7 +2436,17 @@ namespace InfiniteClipboard
             try
             {
                 string cleanup = Path.Combine(Path.GetTempPath(), "InfiniteClipboard-uninstall-" + Process.GetCurrentProcess().Id + ".cmd");
-                string body = "@echo off\r\nfor /l %%i in (1,1,5) do (rmdir /s /q \"" + installDir + "\" && goto done & timeout /t 1 /nobreak >nul)\r\n:done\r\ndel \"%~f0\"\r\n";
+                string updaterPath = Path.Combine(installDir, "UpdateLauncher.exe");
+                foreach (string name in new string[] { "UpdateLauncher.exe", "InfiniteClipboard.ps1", "Launch.vbs", "Uninstall.ps1", "启动无限剪贴板.vbs" })
+                {
+                    try
+                    {
+                        string knownFile = Path.Combine(installDir, name);
+                        if (File.Exists(knownFile)) File.Delete(knownFile);
+                    }
+                    catch { }
+                }
+                string body = "@echo off\r\nfor /l %%i in (1,1,8) do (\r\n  del /f /q \"" + exePath + "\" >nul 2>nul\r\n  del /f /q \"" + updaterPath + "\" >nul 2>nul\r\n  if not exist \"" + exePath + "\" goto done\r\n  timeout /t 1 /nobreak >nul\r\n)\r\n:done\r\nrmdir \"" + installDir + "\" >nul 2>nul\r\ndel \"%~f0\"\r\n";
                 File.WriteAllText(cleanup, body, Encoding.ASCII);
                 var psi = new ProcessStartInfo("cmd.exe", "/c \"" + cleanup + "\"");
                 psi.CreateNoWindow = true;

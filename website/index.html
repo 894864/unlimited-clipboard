@@ -16,7 +16,7 @@
     .page { width:min(1160px,calc(100% - 48px)); min-height:100vh; margin:auto; display:flex; flex-direction:column; }
     nav { height:76px; display:flex; align-items:center; justify-content:space-between; }
     .brand { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-size:16px; font-weight:800; letter-spacing:.01em; }
-    .brand-icon { width:36px; height:36px; filter:drop-shadow(0 8px 15px #3d79d539); }
+    .brand-icon { width:36px; height:36px; filter:drop-shadow(0 7px 13px #74685830); }
     .version { color:#7a899f; font-size:13px; }
     main { flex:1; display:grid; grid-template-columns:minmax(0,1fr) 240px; gap:62px; align-items:center; padding:8px 0 28px; }
     .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border:1px solid #b6cdf633; border-radius:999px; background:#fff9; color:#4c6b9e; font-size:12px; font-weight:750; letter-spacing:.08em; }.eyebrow i { width:7px; height:7px; border-radius:50%; background:#2ab878; box-shadow:0 0 0 4px #2ab87820; }
@@ -33,10 +33,10 @@
   <div class="page">
     <nav>
       <a class="brand" href="/" aria-label="无限剪贴板首页">
-        <svg class="brand-icon" viewBox="0 0 64 64" aria-hidden="true"><rect x="4" y="4" width="56" height="56" rx="15" fill="#2b67ca"/><rect x="27" y="19" width="21" height="29" rx="5" fill="#9fcfff"/><rect x="17" y="15" width="31" height="37" rx="6" fill="#fff"/><rect x="24" y="10" width="17" height="12" rx="5" fill="#cee4ff"/><rect x="23" y="28" width="18" height="3" rx="1.5" fill="#4b8ae0"/><rect x="23" y="35" width="14" height="3" rx="1.5" fill="#4b8ae0"/><rect x="23" y="42" width="10" height="3" rx="1.5" fill="#4b8ae0"/></svg>
+        <svg class="brand-icon" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="app-icon-paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffef9"/><stop offset="1" stop-color="#efe9de"/></linearGradient><linearGradient id="app-icon-fold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffef9"/><stop offset="1" stop-color="#ddd3c3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="15" fill="url(#app-icon-paper)" stroke="#ded4c5"/><path d="M43 4h5c6 2 10 6 12 12v5h-9c-5 0-8-3-8-8Z" fill="url(#app-icon-fold)" stroke="#cfc2ae" stroke-width=".8"/><path d="M15 34c5-11 12-11 17 0s12 11 17 0c-5-11-12-11-17 0s-12 11-17 0Z" fill="none" stroke="#b8aa96" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 34c5-11 12-11 17 0s12 11 17 0c-5-11-12-11-17 0s-12 11-17 0Z" fill="none" stroke="#faf6ed" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>无限剪贴板</span>
       </a>
-      <span class="version">Windows · v1.0.1</span>
+      <span class="version">Windows · v1.0.2</span>
     </nav>
     <main>
       <section>
@@ -45,11 +45,11 @@
         <p class="lead"><strong>无限剪贴板</strong> 安静地记录文本、图片和文件列表，需要时快速找回；重要内容可收藏，其他记录会按你的设置自动清理</p>
         <div class="features">
           <article class="feature"><b>无限留档</b><p>还记得一年前复制粘贴过什么内容吗？这个软件可以为你留档</p></article>
-          <article class="feature"><b>快速找回</b><p>Ctrl + Alt + V 随时打开历史记录</p></article>
+          <article class="feature"><b>快速找回</b><p>快捷键可自定义，冲突时会立即提示</p></article>
           <article class="feature"><b>收藏保留</b><p>重要内容收藏后不会被自动过期清理</p></article>
           <article class="feature"><b>后台运行</b><p>登录后自动记录，驻留系统托盘</p></article>
         </div>
-        <div class="actions"><a class="download" href="download/InfiniteClipboard-Setup-1.0.1.exe" download><b>↓</b>下载 Windows 版</a><span class="hint">v1.0.1 · 无需管理员权限，历史记录仅保存在本地</span></div>
+        <div class="actions"><a class="download" href="download/InfiniteClipboard-Setup-1.0.2.exe" download><b>↓</b>下载 Windows 版</a><span class="hint">v1.0.2 · 无需管理员权限，历史记录仅保存在本地</span></div>
       </section>
       <aside class="qr-side"><img src="assets/xiaohongshu-qr.jpg" alt="灵魂 vibe coder 的小红书二维码"><p class="qr-note">关注作者 / 反馈问题</p></aside>
     </main>

@@ -1,6 +1,6 @@
 ﻿{
-    "version":  "1.0.1",
-    "downloadUrl":  "download/InfiniteClipboard-Setup-1.0.1.exe",
-    "sha256":  "9296A0FCC55A40CAFCDDE66E3F68D0EC2B72035D971BCEF582A14C5E0460836A",
-    "notes":  "Stability improvements and usability updates."
+    "version":  "1.0.2",
+    "downloadUrl":  "download/InfiniteClipboard-Setup-1.0.2.exe",
+    "sha256":  "C72F2527A0B2CBF8F760FAECEF9363BF07A87BA26F3191FE2603A3F93AC1202D",
+    "notes":  "Adds a guided installer, custom conflict-checked hotkeys, in-app uninstall, UI font sizes, and usability fixes."
 }

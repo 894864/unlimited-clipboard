@@ -5,8 +5,8 @@ using System.Threading;
 
 [assembly: System.Reflection.AssemblyTitle("InfiniteClipboard Update Launcher")]
 [assembly: System.Reflection.AssemblyProduct("InfiniteClipboard")]
-[assembly: System.Reflection.AssemblyVersion("1.0.1.0")]
-[assembly: System.Reflection.AssemblyFileVersion("1.0.1.0")]
+[assembly: System.Reflection.AssemblyVersion("1.0.2.0")]
+[assembly: System.Reflection.AssemblyFileVersion("1.0.2.0")]
 
 namespace InfiniteClipboardUpdate
 {

@@ -5,7 +5,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $root = $PSScriptRoot
-$appVersion = '1.0.1'
+$appVersion = '1.0.2'
 $buildDir = Join-Path $root 'build\native'
 $stagingDir = Join-Path $buildDir 'package'
 $outputDir = Join-Path $root 'dist'
@@ -30,43 +30,96 @@ $target = Join-Path $outputDir ("InfiniteClipboard-Setup-" + $appVersion + '.exe
 $legacyTarget = Join-Path $outputDir 'InfiniteClipboard-Setup.exe'
 $sedPath = Join-Path $env:TEMP 'InfiniteClipboard-Native.sed'
 $iconPath = Join-Path $buildDir 'UnlimitedClipboard.ico'
+$iconSourcePath = Join-Path $root 'assets\app-icon-12.png'
 
-function New-AppIcon([string]$Path) {
-    Add-Type -AssemblyName System.Drawing
-    $bitmap = [System.Drawing.Bitmap]::new(64, 64)
-    $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+function Convert-BitmapToIconDib([System.Drawing.Bitmap]$Bitmap) {
+    $size = $Bitmap.Width
+    $xorBytes = $size * $size * 4
+    $maskStride = [int]([Math]::Ceiling($size / 32.0) * 4)
+    $maskBytes = $maskStride * $size
+    $memory = [System.IO.MemoryStream]::new()
+    $writer = [System.IO.BinaryWriter]::new($memory)
     try {
-        $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
-        $graphics.Clear([System.Drawing.Color]::Transparent)
-        $base = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(43, 103, 202))
-        $paper = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::White)
-        $accent = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(140, 193, 255))
-        $graphics.FillEllipse($base, 3, 3, 58, 58)
-        $graphics.FillRectangle($paper, 16, 14, 32, 39)
-        $graphics.FillRectangle($accent, 23, 9, 18, 11)
-        $line = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(65, 127, 219))
-        try {
-            $graphics.FillRectangle($line, 23, 28, 19, 4)
-            $graphics.FillRectangle($line, 23, 36, 15, 4)
-            $graphics.FillRectangle($line, 23, 44, 11, 4)
-        } finally {
-            $line.Dispose()
-            $base.Dispose()
-            $paper.Dispose()
-            $accent.Dispose()
+        $writer.Write([uint32]40)
+        $writer.Write([int32]$size)
+        $writer.Write([int32]($size * 2))
+        $writer.Write([uint16]1)
+        $writer.Write([uint16]32)
+        $writer.Write([uint32]0)
+        $writer.Write([uint32]$xorBytes)
+        $writer.Write([int32]0)
+        $writer.Write([int32]0)
+        $writer.Write([uint32]0)
+        $writer.Write([uint32]0)
+        for ($y = $size - 1; $y -ge 0; $y--) {
+            for ($x = 0; $x -lt $size; $x++) {
+                $pixel = $Bitmap.GetPixel($x, $y)
+                $writer.Write([byte]$pixel.B)
+                $writer.Write([byte]$pixel.G)
+                $writer.Write([byte]$pixel.R)
+                $writer.Write([byte]$pixel.A)
+            }
         }
-        $icon = [System.Drawing.Icon]::FromHandle($bitmap.GetHicon())
-        try {
-            $stream = [System.IO.File]::Create($Path)
-            try { $icon.Save($stream) } finally { $stream.Dispose() }
-        } finally { $icon.Dispose() }
+        $writer.Write([byte[]]::new($maskBytes))
+        $writer.Flush()
+        return ,$memory.ToArray()
     } finally {
-        $graphics.Dispose()
-        $bitmap.Dispose()
+        $writer.Dispose()
+        $memory.Dispose()
     }
 }
 
-New-AppIcon $iconPath
+function New-AppIcon([string]$Path, [string]$SourcePath) {
+    Add-Type -AssemblyName System.Drawing
+    if (-not (Test-Path -LiteralPath $SourcePath)) { throw "App icon source is missing: $SourcePath" }
+    $source = [System.Drawing.Image]::FromFile($SourcePath)
+    $entries = @()
+    try {
+        foreach ($size in @(16, 24, 32, 48, 64, 256)) {
+            $bitmap = [System.Drawing.Bitmap]::new($size, $size)
+            $graphics = [System.Drawing.Graphics]::FromImage($bitmap)
+            try {
+                $graphics.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::AntiAlias
+                $graphics.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+                $graphics.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+                $graphics.Clear([System.Drawing.Color]::Transparent)
+                $graphics.DrawImage($source, [System.Drawing.Rectangle]::new(0, 0, $size, $size))
+                $entries += [pscustomobject]@{ Size = $size; Data = (Convert-BitmapToIconDib $bitmap) }
+            } finally {
+                $graphics.Dispose()
+                $bitmap.Dispose()
+            }
+        }
+    } finally {
+        $source.Dispose()
+    }
+
+    $stream = [System.IO.File]::Create($Path)
+    $writer = [System.IO.BinaryWriter]::new($stream)
+    try {
+        $writer.Write([uint16]0)
+        $writer.Write([uint16]1)
+        $writer.Write([uint16]$entries.Count)
+        $offset = 6 + (16 * $entries.Count)
+        foreach ($entry in $entries) {
+            $dimension = if ($entry.Size -eq 256) { [byte]0 } else { [byte]$entry.Size }
+            $writer.Write($dimension)
+            $writer.Write($dimension)
+            $writer.Write([byte]0)
+            $writer.Write([byte]0)
+            $writer.Write([uint16]1)
+            $writer.Write([uint16]32)
+            $writer.Write([uint32]$entry.Data.Length)
+            $writer.Write([uint32]$offset)
+            $offset += $entry.Data.Length
+        }
+        foreach ($entry in $entries) { $writer.Write([byte[]]$entry.Data) }
+    } finally {
+        $writer.Dispose()
+    }
+}
+
+New-AppIcon $iconPath $iconSourcePath
 
 $wrapper = [IO.File]::ReadAllText($psSource)
 $match = [regex]::Match($wrapper, '(?s)\$source\s*=\s*@"\r?\n(?<code>.*?)\r?\n"@\r?\n\r?\nAdd-Type')
@@ -83,7 +136,7 @@ function Invoke-Csc([string[]]$Arguments) {
 }
 
 Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $mainExe), ('/win32icon:' + $iconPath), '/main:InfiniteClipboard.Program', '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.Xml.dll', '/reference:System.Core.dll', $csSource)
-Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $setupExe), ('/win32icon:' + $iconPath), '/reference:System.Windows.Forms.dll', '/reference:System.dll', $setupCs)
+Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $setupExe), ('/win32icon:' + $iconPath), '/reference:System.Windows.Forms.dll', '/reference:System.Drawing.dll', '/reference:System.dll', $setupCs)
 Invoke-Csc @('/nologo', '/target:winexe', ('/out:' + $updaterExe), '/main:InfiniteClipboardUpdate.Program', '/reference:System.dll', $updaterCs)
 
 if (-not (Test-Path -LiteralPath $mainExe) -or -not (Test-Path -LiteralPath $setupExe) -or -not (Test-Path -LiteralPath $updaterExe)) { throw 'Native executable compilation did not produce the expected files.' }
@@ -148,7 +201,7 @@ $release = [ordered]@{
     version = $appVersion
     downloadUrl = ('download/' + $package.Name)
     sha256 = $hash
-    notes = 'Stability improvements and usability updates.'
+    notes = 'Adds a guided installer, custom conflict-checked hotkeys, in-app uninstall, UI font sizes, and usability fixes.'
 }
 $release | ConvertTo-Json | Set-Content -LiteralPath $releaseFeedPath -Encoding UTF8
 Write-Host ("Native setup package created: {0} ({1:N1} MB)" -f $package.FullName, ($package.Length / 1MB))
