@@ -17,19 +17,20 @@
     nav { height:76px; display:flex; align-items:center; justify-content:space-between; }
     .brand { display:flex; align-items:center; gap:10px; color:var(--ink); text-decoration:none; font-size:16px; font-weight:800; letter-spacing:.01em; }
     .brand-icon { width:36px; height:36px; filter:drop-shadow(0 7px 13px #74685830); }
-    .version { color:#7a899f; font-size:13px; }
-    main { flex:1; display:grid; grid-template-columns:minmax(0,1fr) 240px; gap:62px; align-items:center; padding:8px 0 28px; }
+    .visit-stats { display:flex; align-items:center; gap:12px; color:#61718c; font-size:12px; white-space:nowrap; }.visit-stat { display:flex; align-items:baseline; gap:4px; }.visit-stat b { color:#2d5fae; font-size:15px; font-variant-numeric:tabular-nums; }.visit-divider { width:1px; height:15px; background:#d8e2f0; }
+    main { flex:1; display:grid; grid-template-columns:minmax(0,1fr) 240px; grid-template-areas:"copy qr"; gap:62px; align-items:center; padding:8px 0 28px; }
+    main > section { grid-area:copy; }
     .eyebrow { display:inline-flex; align-items:center; gap:8px; padding:6px 11px; border:1px solid #b6cdf633; border-radius:999px; background:#fff9; color:#4c6b9e; font-size:12px; font-weight:750; letter-spacing:.08em; }.eyebrow i { width:7px; height:7px; border-radius:50%; background:#2ab878; box-shadow:0 0 0 4px #2ab87820; }
     h1 { margin:18px 0 14px; font-size:clamp(42px,5vw,66px); line-height:1.08; letter-spacing:-.065em; }.accent { color:var(--blue); }
     .lead { max-width:680px; margin:0; color:var(--muted); font-size:17px; line-height:1.75; }.lead strong { color:#2a3e61; }
     .features { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; max-width:720px; margin:22px 0 24px; }.feature { min-height:82px; padding:13px 14px; border:1px solid var(--line); border-radius:14px; background:#ffffffb8; box-shadow:0 12px 28px #25466d0a; }.feature b { display:block; margin:0 0 9px; font-size:14px; }.feature p { margin:0; color:#718099; font-size:12px; line-height:1.62; }.feature b::before { display:inline-grid; place-items:center; width:20px; height:20px; margin-right:6px; border-radius:6px; background:#e9f1ff; color:#3976dd; font-size:12px; }.feature:nth-child(1) b::before { content:"∞"; }.feature:nth-child(2) b::before { content:"⌕"; }.feature:nth-child(3) b::before { content:"★"; }.feature:nth-child(4) b::before { content:"↗"; }
     .actions { display:flex; align-items:center; flex-wrap:wrap; gap:14px; }.download { display:inline-flex; align-items:center; gap:9px; padding:14px 19px; border-radius:12px; background:linear-gradient(135deg,#4d91ff,#2f6fe0); box-shadow:0 14px 28px #3975d84a; color:#fff; font-weight:750; text-decoration:none; transition:.2s ease; }.download:hover { transform:translateY(-2px); box-shadow:0 19px 34px #3975d866; }.download b { font-size:20px; line-height:1; }.hint { color:#8190a5; font-size:12px; }
-    .qr-side { justify-self:end; width:262px; text-align:center; }.qr-wrap { position:relative; padding-top:76px; }.qr-link { display:block; border-radius:18px; outline:none; transition:.2s ease; }.qr-link:hover { transform:translateY(-2px); }.qr-link:focus-visible { box-shadow:0 0 0 4px #3679ed38; }.qr-link img { display:block; width:262px; height:auto; border:1px solid #dce7f8; border-radius:18px; background:#fff; box-shadow:0 24px 54px #2648751c; }.qr-callout { position:absolute; top:0; right:2px; width:210px; height:76px; color:#4d6792; pointer-events:none; transform:rotate(-2deg); }.qr-callout span { position:absolute; z-index:1; top:7px; left:0; width:106px; font-family:"STKaiti","KaiTi","Microsoft YaHei UI",sans-serif; font-size:14px; font-weight:700; letter-spacing:.04em; text-align:left; }.qr-callout svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }.qr-callout path { fill:none; stroke:#5f7dab; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }.qr-note { margin:12px 0 0; color:#526889; font-size:13px; font-weight:700; }
+    .qr-side { grid-area:qr; justify-self:end; width:262px; text-align:center; }.qr-wrap { position:relative; padding-top:100px; }.qr-link { display:block; border-radius:18px; outline:none; transition:.2s ease; }.qr-link:hover { transform:translateY(-2px); }.qr-link:focus-visible { box-shadow:0 0 0 4px #3679ed38; }.qr-link img { display:block; width:262px; height:auto; border:1px solid #dce7f8; border-radius:18px; background:#fff; box-shadow:0 24px 54px #2648751c; }.qr-callout { position:absolute; top:0; right:2px; width:210px; height:96px; color:#4d6792; pointer-events:none; transform:rotate(-2deg); }.qr-callout span { position:absolute; z-index:1; top:7px; left:0; width:106px; font-family:"STKaiti","KaiTi","Microsoft YaHei UI",sans-serif; font-size:14px; font-weight:700; letter-spacing:.04em; text-align:left; }.qr-callout svg { position:absolute; inset:0; width:100%; height:100%; overflow:visible; }.qr-callout path { fill:none; stroke:#5f7dab; stroke-width:2.1; stroke-linecap:round; stroke-linejoin:round; }.qr-note { margin:12px 0 0; color:#526889; font-size:13px; font-weight:700; }
     footer { display:flex; justify-content:flex-end; padding:8px 0 20px; color:#74839a; font-size:12px; line-height:1.7; text-align:right; }
     footer a { color:#4d72ad; font-weight:700; text-decoration:none; border-bottom:1px solid #4d72ad45; transition:.18s ease; }
     footer a:hover { color:#2f6fe0; border-bottom-color:#2f6fe0; }
-    @media (max-width:820px) { .page { width:min(100% - 32px,620px); }.version { display:none; } main { display:flex; flex-direction:column; align-items:stretch; gap:18px; padding:36px 0; }.qr-side { order:2; align-self:flex-start; width:228px; margin-top:4px; }.qr-link img { width:228px; }.qr-callout { right:-2px; }.features { max-width:none; } footer { justify-content:flex-start; text-align:left; } }
-    @media (max-width:560px) { .page { width:min(100% - 28px,620px); } nav { height:64px; } h1 { font-size:43px; }.lead { font-size:16px; }.features { grid-template-columns:1fr; }.feature { min-height:0; } }
+    @media (max-width:820px) { .page { width:min(100% - 32px,620px); }.visit-stats { gap:9px; } main { grid-template-columns:minmax(0,1fr); grid-template-areas:"copy" "qr"; align-items:start; gap:18px; padding:36px 0; }.actions { flex-direction:column; align-items:flex-start; gap:10px; }.hint { display:block; max-width:100%; line-height:1.6; }.qr-side { justify-self:start; width:228px; margin-top:4px; }.qr-link img { width:228px; }.qr-callout { right:-2px; }.features { max-width:none; } footer { justify-content:flex-start; text-align:left; } }
+    @media (max-width:560px) { .page { width:min(100% - 28px,620px); } nav { height:64px; }.visit-stats { font-size:11px; }.visit-stat b { font-size:13px; } h1 { font-size:43px; }.lead { font-size:16px; }.features { grid-template-columns:1fr; }.feature { min-height:0; } }
   </style>
 </head>
 <body>
@@ -39,7 +40,11 @@
         <svg class="brand-icon" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="app-icon-paper" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fffef9"/><stop offset="1" stop-color="#efe9de"/></linearGradient><linearGradient id="app-icon-fold" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#fffef9"/><stop offset="1" stop-color="#ddd3c3"/></linearGradient></defs><rect x="4" y="4" width="56" height="56" rx="15" fill="url(#app-icon-paper)" stroke="#ded4c5"/><path d="M43 4h5c6 2 10 6 12 12v5h-9c-5 0-8-3-8-8Z" fill="url(#app-icon-fold)" stroke="#cfc2ae" stroke-width=".8"/><path d="M15 34c5-11 12-11 17 0s12 11 17 0c-5-11-12-11-17 0s-12 11-17 0Z" fill="none" stroke="#b8aa96" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 34c5-11 12-11 17 0s12 11 17 0c-5-11-12-11-17 0s-12 11-17 0Z" fill="none" stroke="#faf6ed" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span>无限剪贴板</span>
       </a>
-      <span class="version">Windows · v1.0.2</span>
+      <div class="visit-stats" aria-label="网站访问量">
+        <span class="visit-stat">今日访问 <b id="today-visits">—</b></span>
+        <span class="visit-divider" aria-hidden="true"></span>
+        <span class="visit-stat">历史访问 <b id="total-visits">—</b></span>
+      </div>
     </nav>
     <main>
       <section>
@@ -56,7 +61,7 @@
       </section>
       <aside class="qr-side">
         <div class="qr-wrap">
-          <div class="qr-callout" aria-hidden="true"><span>点击进入主页</span><svg viewBox="0 0 210 76"><defs><marker id="loop-arrow-head" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1 9 5 1 9"/></marker></defs><path marker-end="url(#loop-arrow-head)" d="M104 18C137-4 184 7 188 34c4 25-25 39-50 25-22-12-21-34-1-41 20-7 39 8 37 27-1 11-8 18-16 25"/></svg></div>
+          <div class="qr-callout" aria-hidden="true"><span>点击进入主页</span><svg viewBox="0 0 210 96"><defs><marker id="loop-arrow-head" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse"><path d="M1 1 9 5 1 9"/></marker></defs><path marker-end="url(#loop-arrow-head)" d="M104 18C138-4 187 7 190 36c3 27-31 42-57 27-22-13-19-37 4-45 22-8 42 8 40 30-1 14-11 22-15 30-2 5-1 10 2 15"/></svg></div>
           <a class="qr-link" href="https://xhslink.com/m/1xRYmUsjhSk" target="_blank" rel="noopener noreferrer" aria-label="打开灵魂 vibe coder 的小红书主页"><img src="assets/xiaohongshu-qr.jpg" alt="灵魂 vibe coder 的小红书二维码"></a>
         </div>
         <p class="qr-note">关注作者 / 反馈问题</p>
@@ -64,5 +69,15 @@
     </main>
     <footer>本软件已开源：<a href="https://github.com/894864/unlimited-clipboard" target="_blank" rel="noopener noreferrer">894864/unlimited-clipboard</a>&nbsp;，对您有帮助的话欢迎来点个星星哟</footer>
   </div>
+  <script>
+    fetch('/api/visits', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((stats) => {
+        const format = new Intl.NumberFormat('zh-CN');
+        document.getElementById('today-visits').textContent = format.format(stats.today);
+        document.getElementById('total-visits').textContent = format.format(stats.total);
+      })
+      .catch(() => {});
+  </script>
 </body>
 </html>
