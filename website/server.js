@@ -64,7 +64,7 @@ function scheduledVisitCount(date, minuteLimit) {
   while (minute < minuteLimit) {
     count += 1;
     seed = (seed * 1664525 + 1013904223) >>> 0;
-    minute += 5 + (seed % 11);
+    minute += 20 + (seed % 21);
   }
   return count;
 }
