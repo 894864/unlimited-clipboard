@@ -65,6 +65,23 @@
     }
     .brand { display: flex; align-items: center; gap: 10px; color: var(--ink); text-decoration: none; font-size: 15px; font-weight: 800; letter-spacing: .02em; }
     .brand-icon { width: 34px; height: 34px; object-fit: contain; filter: drop-shadow(0 4px 12px #4d8dff66); }
+    .nav-tools { display: flex; align-items: center; gap: 24px; }
+    .version-switch {
+      position: relative; display: grid; grid-template-columns: 1fr 1fr; width: 264px; padding: 3px;
+      border: 1px solid #ffffff1f; border-radius: 999px; background: #ffffff08;
+      box-shadow: inset 0 1px 5px #00000055;
+    }
+    .version-switch::before {
+      content: ""; position: absolute; top: 3px; bottom: 3px; left: 3px; width: calc(50% - 3px);
+      border-radius: 999px; background: linear-gradient(110deg, #3477e9, #7a58e9);
+      box-shadow: 0 5px 18px #4d8dff50, inset 0 1px 0 #ffffff3d;
+      transform: translateX(100%); transition: transform .25s ease;
+    }
+    .version-switch a {
+      position: relative; z-index: 1; padding: 7px 9px; color: #7f8aa7; font-size: 11px; font-weight: 700;
+      line-height: 1; text-align: center; text-decoration: none; white-space: nowrap; transition: color .2s ease;
+    }
+    .version-switch a[aria-current="page"] { color: #fff; }
     .visit-stats { display: flex; align-items: center; gap: 12px; color: var(--muted); font-family: var(--mono); font-size: 11px; white-space: nowrap; }
     .visit-stat { display: flex; align-items: baseline; gap: 5px; }
     .visit-stat b { color: var(--cyan); font-size: 14px; font-variant-numeric: tabular-nums; font-weight: 700; }
@@ -209,6 +226,8 @@
 
     /* ---------- 平板 ---------- */
     @media (max-width: 980px) {
+      .nav-tools { gap: 14px; }
+      .version-switch { width: 240px; }
       .hero { grid-template-columns: 1fr; gap: 52px; padding: 64px 0 56px; }
       .showcase { max-width: 560px; }
       .window { transform: none; animation: none; }
@@ -221,9 +240,12 @@
     /* ---------- 手机 ---------- */
     @media (max-width: 600px) {
       .page { width: calc(100% - 32px); }
-      nav { top: 10px; margin-top: 10px; padding: 9px 13px; }
+      nav { top: 10px; margin-top: 10px; padding: 9px 13px; border-radius: 20px; flex-wrap: wrap; }
       .brand { font-size: 13.5px; }
       .brand-icon { width: 28px; height: 28px; }
+      .nav-tools { display: contents; }
+      .version-switch { order: 3; width: 100%; }
+      .version-switch a { padding-block: 8px; font-size: 10.5px; }
       .visit-stats { gap: 8px; font-size: 10px; }
       .visit-stat b { font-size: 12px; }
       .hero { gap: 44px; padding: 48px 0 44px; }
@@ -266,10 +288,16 @@
         <img class="brand-icon" src="assets/app-icon-12.png" alt="" aria-hidden="true">
         <span>无限剪贴板</span>
       </a>
-      <div class="visit-stats" aria-label="网站访问量">
-        <span class="visit-stat">今日 <b id="today-visits">0</b></span>
-        <span class="visit-divider" aria-hidden="true"></span>
-        <span class="visit-stat">累计 <b id="total-visits">0</b></span>
+      <div class="nav-tools">
+        <div class="version-switch" aria-label="切换网页版本">
+          <a href="/gpt-5.6-sol.html">gpt-5.6-sol版网页</a>
+          <a href="/" aria-current="page">kimi-k3版网页</a>
+        </div>
+        <div class="visit-stats" aria-label="网站访问量">
+          <span class="visit-stat">今日 <b id="today-visits">0</b></span>
+          <span class="visit-divider" aria-hidden="true"></span>
+          <span class="visit-stat">累计 <b id="total-visits">0</b></span>
+        </div>
       </div>
     </nav>
 
