@@ -4,7 +4,7 @@
 
 ## 下载与安装
 
-从[官方网站](https://unlimited-clipboard.cetle.cn/)下载 `unlimited-clipboard-setup-v1.0.3.exe`。安装向导默认安装到当前用户的软件目录，也可自定义安装位置；安装不需要管理员权限。
+从[官方网站](https://unlimited-clipboard.cetle.cn/)下载 `unlimited-clipboard-windows-v1.0.3.zip`，解压后运行其中的安装程序。安装向导默认安装到当前用户的软件目录，也可自定义安装位置；安装不需要管理员权限。
 
 安装完成后会创建桌面和开始菜单入口。程序关闭主窗口后继续驻留系统托盘；只有托盘菜单中的“退出”才会完全停止剪贴板监听。
 
@@ -18,7 +18,7 @@
 .\Build-Installer.ps1
 ```
 
-构建脚本会编译原生 Windows EXE，并在 `dist` 中生成 `unlimited-clipboard-setup-v1.0.3.exe`；同时更新网站下载文件和 `website/releases.json` 的 SHA-256。程序、安装向导和卸载流程不会弹出 PowerShell、CMD 或 VBS 窗口。
+构建脚本会编译原生 Windows EXE，并在 `dist` 中生成自动更新使用的 `unlimited-clipboard-setup-v1.0.3.exe`，以及面向网站和 GitHub Release 的 `unlimited-clipboard-windows-v1.0.3.zip`；同时更新网站下载文件和 `website/releases.json` 的 SHA-256。程序、安装向导和卸载流程不会弹出 PowerShell、CMD 或 VBS 窗口。
 
 只检查主程序能否编译：
 
@@ -29,6 +29,10 @@
 ## 下载网站
 
 `website` 是产品官网，Node 入口为 `website/server.js`，并提供 `/healthz` 健康检查。推送到 `main` 后，`.github/workflows/deploy.yml` 会更新生产服务器并重新加载网站服务。
+
+## GitHub Release
+
+推送格式为 `v版本号` 的标签后，`.github/workflows/release.yml` 会校验标签版本、EXE 哈希和 ZIP 内容，并只把该标签提交中已经构建好的 `unlimited-clipboard-windows-v版本号.zip` 上传为 GitHub Release 资产。裸 EXE 仅保留给软件内部自动更新通道。
 
 ## 软件更新通道
 

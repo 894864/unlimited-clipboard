@@ -27,6 +27,7 @@ $setupExe = Join-Path $stagingDir 'SetupLauncher.exe'
 $updaterCs = Join-Path $root 'installer\UpdateLauncher.cs'
 $updaterExe = Join-Path $stagingDir 'UpdateLauncher.exe'
 $target = Join-Path $outputDir ("unlimited-clipboard-setup-v" + $appVersion + '.exe')
+$releaseZip = Join-Path $outputDir ("unlimited-clipboard-windows-v" + $appVersion + '.zip')
 $legacyTarget = Join-Path $outputDir 'unlimited-clipboard-setup.exe'
 $sedPath = Join-Path $env:TEMP 'unlimited-clipboard-native.sed'
 $iconPath = Join-Path $buildDir 'unlimited-clipboard.ico'
@@ -198,7 +199,11 @@ Get-ChildItem -LiteralPath $outputDir -Filter '~unlimited-clipboard-*' -ErrorAct
 Get-ChildItem -LiteralPath $outputDir -Filter 'RCXC*.tmp' -ErrorAction SilentlyContinue | Remove-Item -Force -ErrorAction SilentlyContinue
 
 $package = Get-Item -LiteralPath $target
+if (Test-Path -LiteralPath $releaseZip) { Remove-Item -LiteralPath $releaseZip -Force -ErrorAction Stop }
+Compress-Archive -LiteralPath $target -DestinationPath $releaseZip -CompressionLevel Optimal
+if (-not (Test-Path -LiteralPath $releaseZip) -or (Get-Item -LiteralPath $releaseZip).Length -lt 1024) { throw 'The ZIP release package is incomplete.' }
 Copy-Item -LiteralPath $target -Destination (Join-Path $siteDownloadDir $package.Name) -Force
+Copy-Item -LiteralPath $releaseZip -Destination (Join-Path $siteDownloadDir (Split-Path -Leaf $releaseZip)) -Force
 $hash = (Get-FileHash -LiteralPath $target -Algorithm SHA256).Hash
 $release = [ordered]@{
     version = $appVersion
@@ -208,6 +213,8 @@ $release = [ordered]@{
 }
 $release | ConvertTo-Json | Set-Content -LiteralPath $releaseFeedPath -Encoding UTF8
 Write-Host ("Native setup package created: {0} ({1:N1} MB)" -f $package.FullName, ($package.Length / 1MB))
+Write-Host ("GitHub ZIP release package created: {0}" -f $releaseZip)
 Write-Host ("Website download file updated: {0}" -f (Join-Path $siteDownloadDir $package.Name))
+Write-Host ("Website ZIP download file updated: {0}" -f (Join-Path $siteDownloadDir (Split-Path -Leaf $releaseZip)))
 Write-Host ("Website release feed updated: {0}" -f $releaseFeedPath)
 if ($OpenOutputFolder) { Start-Process explorer.exe -ArgumentList ('/select,"' + $target + '"') }
