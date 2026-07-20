@@ -5,7 +5,7 @@ const crypto = require('node:crypto');
 
 const root = path.resolve(__dirname);
 const port = Number.parseInt(process.env.PORT || '3000', 10);
-const mimeTypes = { '.css': 'text/css; charset=utf-8', '.exe': 'application/vnd.microsoft.portable-executable', '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const mimeTypes = { '.css': 'text/css; charset=utf-8', '.exe': 'application/vnd.microsoft.portable-executable', '.html': 'text/html; charset=utf-8', '.jpg': 'image/jpeg', '.js': 'text/javascript; charset=utf-8', '.json': 'application/json; charset=utf-8', '.png': 'image/png', '.svg': 'image/svg+xml', '.zip': 'application/zip' };
 const statsDirectory = path.join(root, 'data');
 const statsFile = path.join(statsDirectory, 'visit-stats.json');
 
@@ -162,7 +162,7 @@ const server = http.createServer((req, res) => {
     const ext = path.extname(filePath).toLowerCase();
     const isMutable = ext === '.html' || ext === '.json';
     const headers = { 'Content-Type': mimeTypes[ext] || 'application/octet-stream', 'Cache-Control': isMutable ? 'no-cache' : 'public, max-age=604800' };
-    if (ext === '.exe') {
+    if (ext === '.exe' || ext === '.zip') {
       if (req.method === 'GET' && relativePath.toLowerCase().startsWith('download/')) recordDownload(req, todayInChina());
       headers['Content-Disposition'] = `attachment; filename="${path.basename(filePath)}"`;
     }
