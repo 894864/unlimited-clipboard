@@ -103,8 +103,8 @@
     .lead strong { color: var(--ink); font-weight: 700; }
 
     /* ---------- 下载区 ---------- */
-    .actions { display: grid; gap: 18px; margin-top: 36px; }
-    .download-line { display: flex; align-items: center; flex-wrap: wrap; gap: 16px; }
+    .actions { width: fit-content; margin-top: 40px; }
+    .download-line { display: flex; align-items: center; }
     .download-stack { position: relative; }
     .version-hint {
       position: absolute; bottom: calc(100% + 8px); left: 2px; white-space: nowrap;
@@ -126,11 +126,7 @@
       transform: translateX(-110%); animation: shine 3.6s ease-in-out infinite;
     }
     @keyframes shine { 42%, 100% { transform: translateX(110%); } }
-    .btn-ghost { border: 1px solid var(--line); background: var(--glass); color: var(--ink); backdrop-filter: blur(8px); }
-    .btn-ghost:hover { border-color: #ffffff38; background: #ffffff10; box-shadow: 0 12px 32px #00000050; }
     .btn svg { width: 18px; height: 18px; flex: none; }
-    .download-help { max-width: 380px; color: #6d7891; font-size: 12px; line-height: 1.7; }
-    .download-help code { color: #9aa7c4; font-family: var(--mono); font-size: 11px; }
 
     /* ---------- 首屏右侧：产品窗口模拟 ---------- */
     .showcase { position: relative; perspective: 1200px; }
@@ -251,11 +247,10 @@
       .hero { gap: 44px; padding: 48px 0 44px; }
       h1 { font-size: clamp(38px, 11.5vw, 46px); }
       .lead { font-size: 14.5px; line-height: 1.8; }
-      .actions { margin-top: 30px; }
-      .download-line { flex-direction: column; align-items: stretch; gap: 12px; }
+      .actions { width: 100%; margin-top: 34px; }
+      .download-line { align-items: stretch; }
       .btn { width: 100%; min-height: 52px; }
       .version-hint { position: static; display: block; margin-bottom: 8px; white-space: normal; line-height: 1.6; }
-      .download-help { max-width: none; font-size: 11.5px; }
       .clip-body b { font-size: 12px; }
       .features { grid-template-columns: 1fr; gap: 12px; }
       .feature { display: grid; grid-template-columns: 44px 1fr; gap: 4px 16px; padding: 18px; }
@@ -310,19 +305,11 @@
           <div class="download-line">
             <div class="download-stack">
               <span class="version-hint">v1.0.3 · 无需管理员权限 · 历史记录仅保存在本地</span>
-              <a class="btn btn-primary" href="download/unlimited-clipboard-setup-v1.0.3.exe" download>
+              <a class="btn btn-primary" href="https://github.com/894864/unlimited-clipboard/releases/download/v1.0.3/unlimited-clipboard-setup-v1.0.3.exe" download>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0 4.5-4.5M12 15l-4.5-4.5M4 20h16"/></svg>
-                直接下载
+                Windows下载
               </a>
             </div>
-            <span class="download-help">未注册公司签名，下载受阻时：先点击<code>保留</code>，再点击<code>删除</code>右侧的下拉按钮，最后点击弹出的<code>保留</code>即可。</span>
-          </div>
-          <div class="download-line">
-            <a class="btn btn-ghost" href="https://github.com/894864/unlimited-clipboard/releases/tag/v1.0.3" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.17c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.35.96.11-.75.4-1.25.73-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.66.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.55A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-              GitHub 下载
-            </a>
-            <span class="download-help">全球最大开源网站 GitHub 下载（Assets 下 <code>unlimited-clipboard-setup-v1.0.3.exe</code>）</span>
           </div>
         </div>
       </section>
